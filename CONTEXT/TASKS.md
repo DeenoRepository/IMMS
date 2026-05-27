@@ -537,4 +537,24 @@ Add templates manager tab in settings UI, integrate required documents checks, a
 - [x] Display alert/notification headers with missing document types if passport is incomplete
 - [x] Verify frontend compilation and full workspace functionality
 
+---
+
+## Task ID: task-ui-modal-redesign
+Title: High-Fidelity Modal Windows UI/UX Redesign
+Status: done
+Priority: medium
+Dependencies: [task-frontend-mandatory-docs]
+
+### Description
+Improve UI/UX of modal windows to make them feel highly professional and polished (translucent dark overlays, deep backdrop blurs, organic scale transitions, circular SVG close buttons, and seamless footers).
+
+### Checklist
+- [x] Integrate backdrop blur and translucent dark background variables
+- [x] Configure smooth organic bezier spring scale transitions on modal entry
+- [x] Upgrade close button inside Modal component to custom SVG icon with circular hover background
+- [x] Refine footer padding and background color to be seamless
+- [x] Add elegant narrow micro-scrollbar styles to modal bodies
+- [x] Verify full project compilation
+
+
 

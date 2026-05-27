@@ -19,6 +19,8 @@
 - Equipment Mandatory Document Templates (checking for uploaded files matching global or category-specific templates and warning of missing required documents inside the passport) fully implemented.
 - Technical Document Previews (native rendering of PDF, images, plain text, and placeholder displays for unsupported formats) fully implemented inside the technical passport.
 - Document Upload Constraints (dynamic allowed extensions list and maximum file size validation limits, client-side pre-checks, strict server-side Multer security validations, and a dedicated Upload Settings manager tab for admins) fully implemented.
+- High-Fidelity Modal Windows UI/UX Redesign (translucent dark overlays, deep backdrop blurs, organic spring-like scale transitions, perfect circular SVG close buttons, and seamless footers) fully implemented.
+
 
 ## Completed Tasks
 - `task-monorepo-init`: Monorepo Workspace Setup

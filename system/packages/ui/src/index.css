@@ -208,53 +208,69 @@ body {
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(4px);
+  background-color: var(--backdrop-bg, rgba(9, 9, 11, 0.45));
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
-  animation: fadeIn var(--transition-fast) forwards;
+  padding: var(--space-md);
+  animation: fadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .mech-modal-container {
   background-color: var(--bg-secondary);
   border: 1px solid var(--border-color);
-  border-radius: var(--radius-lg);
-  width: 90%;
+  border-radius: 16px;
+  width: 100%;
   max-width: 550px;
-  box-shadow: var(--shadow-lg);
+  box-shadow: var(--shadow-lg), 0 0 0 1px var(--border-color);
   overflow: hidden;
-  animation: slideUp var(--transition-normal) cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  display: flex;
+  flex-direction: column;
+  max-height: 90vh;
+  animation: slideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .mech-modal-container-lg {
-  max-width: 800px;
+  max-width: 920px;
+}
+
+.mech-modal-container-lg .mech-modal-body {
+  height: 620px;
 }
 
 .mech-modal-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: var(--space-md) var(--space-lg);
+  padding: 20px 24px;
   border-bottom: 1px solid var(--border-color);
+  background-color: var(--bg-secondary);
 }
 
 .mech-modal-header h3 {
   margin: 0;
   font-size: var(--font-size-lg);
   font-weight: 600;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
 }
 
 .mech-modal-close-btn {
   background: transparent;
   border: none;
-  color: var(--text-secondary);
+  color: var(--text-muted);
   cursor: pointer;
-  padding: var(--space-xxs);
-  border-radius: var(--radius-sm);
-  transition: color var(--transition-fast), background-color var(--transition-fast);
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  transition: all var(--transition-fast);
   display: flex;
+  align-items: center;
+  justify-content: center;
+  outline: none;
 }
 
 .mech-modal-close-btn:hover {
@@ -262,29 +278,60 @@ body {
   background-color: var(--bg-tertiary);
 }
 
+.mech-modal-close-btn:focus-visible {
+  box-shadow: 0 0 0 2px var(--border-focus);
+}
+
 .mech-modal-body {
-  padding: var(--space-lg);
+  padding: 24px;
   overflow-y: auto;
-  max-height: 70vh;
+  flex: 1;
+}
+
+/* Premium micro scrollbars for modal body */
+.mech-modal-body::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.mech-modal-body::-webkit-scrollbar-track {
+  background: transparent;
+}
+.mech-modal-body::-webkit-scrollbar-thumb {
+  background-color: var(--border-color);
+  border-radius: var(--radius-pill);
+}
+.mech-modal-body::-webkit-scrollbar-thumb:hover {
+  background-color: var(--text-muted);
 }
 
 .mech-modal-footer {
   display: flex;
   justify-content: flex-end;
+  align-items: center;
   gap: var(--space-sm);
-  padding: var(--space-md) var(--space-lg);
+  padding: 16px 24px;
   border-top: 1px solid var(--border-color);
-  background-color: var(--bg-tertiary);
+  background-color: var(--bg-secondary);
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from { 
+    opacity: 0; 
+  }
+  to { 
+    opacity: 1; 
+  }
 }
 
 @keyframes slideUp {
-  from { transform: translateY(20px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
+  from { 
+    transform: scale(0.96) translateY(12px); 
+    opacity: 0; 
+  }
+  to { 
+    transform: scale(1) translateY(0); 
+    opacity: 1; 
+  }
 }
 
 /* Tabs Component */
