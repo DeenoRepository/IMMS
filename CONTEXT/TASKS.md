@@ -195,3 +195,45 @@ Rename package to `@core/ui` and implement remaining core, data, and industrial 
 ### Notes
 None.
 
+---
+
+## Task ID: task-backend-equipment
+Title: Equipment Backend CRUD API
+Status: done
+Priority: high
+Dependencies: [task-ui-controls]
+
+### Description
+Create Equipment entity, service, controller, and DTOs on the backend, and register them.
+
+### Checklist
+- [x] Create Equipment TypeORM Entity
+- [x] Create CreateEquipmentDto and UpdateEquipmentDto with validation
+- [x] Create EquipmentService implementing CRUD logic (with seed data)
+- [x] Create EquipmentController exposing REST endpoints with JWT/RBAC guards
+- [x] Register EquipmentModule in app.module.ts and compile successfully
+
+### Notes
+None.
+
+---
+
+## Task ID: task-frontend-equipment
+Title: Equipment Frontend Module
+Status: done
+Priority: high
+Dependencies: [task-backend-equipment]
+
+### Description
+Build the Equipment view on the frontend, integrating list table, CRUD forms inside modals, and API calls.
+
+### Checklist
+- [x] Create API client functions to fetch, create, update, and delete equipment
+- [x] Create Equipment main page displaying equipment list using `@core/ui` Table and search filters
+- [x] Create EquipmentModal component using `@core/ui` Select, Input, and Modal
+- [x] Integrate the Equipment view into the Frontend Shell routes to replace the placeholder
+- [x] Verify functionality (create, edit, delete, permissions check) and ensure it builds correctly
+
+### Notes
+None.
+

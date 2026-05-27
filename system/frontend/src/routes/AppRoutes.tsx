@@ -4,6 +4,7 @@ import { useAuthStore, type UserRole } from '../store/authStore';
 import { AppLayout } from '../layout/AppLayout';
 import { Login } from '../pages/Login';
 import { Dashboard } from '../pages/Dashboard';
+import { Equipment } from '../pages/Equipment';
 
 // Route Guards
 const RequireAuth: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -21,12 +22,6 @@ const RequireRole: React.FC<{ children: React.ReactNode; allowedRoles?: UserRole
 };
 
 // Module Placeholder Components
-const EquipmentPlaceholder = () => (
-  <div className="module-placeholder">
-    <h2>Equipment Management Module</h2>
-    <p>This is a placeholder for the equipment module. Once implemented, it will render here dynamically.</p>
-  </div>
-);
 
 const MaintenancePlaceholder = () => (
   <div className="module-placeholder">
@@ -77,7 +72,7 @@ export const AppRoutes: React.FC = () => {
           path="equipment" 
           element={
             <RequireRole allowedRoles={['mechanic', 'chief_mechanic', 'admin']}>
-              <EquipmentPlaceholder />
+              <Equipment />
             </RequireRole>
           } 
         />

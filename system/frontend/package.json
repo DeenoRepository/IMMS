@@ -10,12 +10,13 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@core/ui": "*",
+    "axios": "^1.16.1",
+    "lucide-react": "^0.475.0",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
     "react-router-dom": "^6.28.2",
-    "zustand": "^4.5.5",
-    "lucide-react": "^0.475.0",
-    "@core/ui": "*"
+    "zustand": "^4.5.5"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
