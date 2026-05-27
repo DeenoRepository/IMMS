@@ -235,10 +235,7 @@ body {
 
 .mech-modal-container-lg {
   max-width: 920px;
-}
-
-.mech-modal-container-lg .mech-modal-body {
-  height: 620px;
+  height: 720px;
 }
 
 .mech-modal-header {
