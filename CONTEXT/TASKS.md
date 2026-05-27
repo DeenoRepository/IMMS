@@ -574,6 +574,27 @@ Review and refine all paddings, margins, gaps, and border boundaries inside core
 - [x] Polish inline document upload and checklist badges vertical alignments inside modal windows
 - [x] Rebuild design system `@core/ui` and verify clean compilation and visual updates
 
+---
+
+## Task ID: task-ui-equipment-advanced-filters
+Title: Professional and Convenient Advanced Filters on Equipment Registry
+Status: done
+Priority: high
+Dependencies: [task-ui-spacings-polish]
+
+### Description
+Implement a highly professional, interactive, and convenient filtering panel for the Equipment Registry. The UI will support a main search bar, status count badges, a collapsible "Advanced Filters" drawer grid (filtering by category, criticality, location, and manufacturer), an active filters indicator count, and a unified "Reset Filters" action button.
+
+### Checklist
+- [x] Refactor Equipment.tsx state to manage multiple advanced filters (category, criticality, manufacturer)
+- [x] Build search input with a dynamic clear button ("x")
+- [x] Implement collapsible advanced filters card panel with slide-down transition
+- [x] Render active filters indicators and matching items count summary
+- [x] Implement a unified "Reset Filters" action button to restore defaults
+- [x] Verify full monorepo production compilation and test functionality
+
+
+
 
 
 

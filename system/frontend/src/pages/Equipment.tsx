@@ -3,7 +3,7 @@ import { useAuthStore } from '../store/authStore';
 import { Card, Button, Input, Select, Table, EquipmentStatusIndicator, MaintenancePriorityTag, Modal, Tabs } from '@core/ui';
 import api from '../utils/api';
 import { EquipmentModal, type EquipmentFormValues } from './EquipmentModal';
-import { Plus, Trash2, Edit, RefreshCw, Settings } from 'lucide-react';
+import { Plus, Trash2, Edit, RefreshCw, Settings, Search, SlidersHorizontal, ChevronDown, ChevronUp, RotateCcw, X } from 'lucide-react';
 
 interface CategoryAttribute {
   id: string;
@@ -63,6 +63,14 @@ export const Equipment: React.FC = () => {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [typeFilter, setTypeFilter] = useState('all');
+
+  // Advanced Filters
+  const [isFiltersExpanded, setIsFiltersExpanded] = useState(false);
+  const [criticalityFilter, setCriticalityFilter] = useState('all');
+  const [categoryIdFilter, setCategoryIdFilter] = useState('all');
+  const [manufacturerFilter, setManufacturerFilter] = useState('');
+  const [locationFilter, setLocationFilter] = useState('');
+
 
   // Modal states
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -178,6 +186,27 @@ export const Equipment: React.FC = () => {
     } catch (err) {
       console.error('Failed to fetch upload settings', err);
     }
+  };
+
+  const activeFiltersCount = useMemo(() => {
+    let count = 0;
+    if (statusFilter !== 'all') count++;
+    if (typeFilter !== 'all') count++;
+    if (categoryIdFilter !== 'all') count++;
+    if (criticalityFilter !== 'all') count++;
+    if (manufacturerFilter.trim() !== '') count++;
+    if (locationFilter.trim() !== '') count++;
+    return count;
+  }, [statusFilter, typeFilter, categoryIdFilter, criticalityFilter, manufacturerFilter, locationFilter]);
+
+  const handleResetFilters = () => {
+    setSearch('');
+    setStatusFilter('all');
+    setTypeFilter('all');
+    setCriticalityFilter('all');
+    setCategoryIdFilter('all');
+    setManufacturerFilter('');
+    setLocationFilter('');
   };
 
   const handleSaveUploadSettings = async () => {
@@ -702,9 +731,19 @@ export const Equipment: React.FC = () => {
           (item.inventoryNumber && item.inventoryNumber.toLowerCase().includes(search.toLowerCase())) ||
           (item.manufacturer && item.manufacturer.toLowerCase().includes(search.toLowerCase())) ||
           (item.model && item.model.toLowerCase().includes(search.toLowerCase()));
+          
         const matchesStatus = statusFilter === 'all' || item.status === statusFilter;
         const matchesType = typeFilter === 'all' || item.type === typeFilter;
-        return matchesSearch && matchesStatus && matchesType;
+        
+        // Advanced dynamic checks
+        const matchesCategory = categoryIdFilter === 'all' || item.categoryId === categoryIdFilter;
+        const matchesCriticality = criticalityFilter === 'all' || item.criticality === criticalityFilter;
+        const matchesManufacturer = !manufacturerFilter.trim() || 
+          (item.manufacturer && item.manufacturer.toLowerCase().includes(manufacturerFilter.toLowerCase().trim()));
+        const matchesLocation = !locationFilter.trim() || 
+          item.location.toLowerCase().includes(locationFilter.toLowerCase().trim());
+          
+        return matchesSearch && matchesStatus && matchesType && matchesCategory && matchesCriticality && matchesManufacturer && matchesLocation;
       })
       .sort((a, b) => {
         const fieldA = (a as any)[sortBy] || '';
@@ -713,7 +752,8 @@ export const Equipment: React.FC = () => {
         if (fieldA > fieldB) return sortDirection === 'asc' ? 1 : -1;
         return 0;
       });
-  }, [data, search, statusFilter, typeFilter, sortBy, sortDirection]);
+  }, [data, search, statusFilter, typeFilter, categoryIdFilter, criticalityFilter, manufacturerFilter, locationFilter, sortBy, sortDirection]);
+
 
   // Table columns definition
   const columns = useMemo(() => {
@@ -848,39 +888,189 @@ export const Equipment: React.FC = () => {
 
       {/* Filter Options */}
       <Card style={{ padding: 'var(--space-md)' }}>
-        <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap' }}>
-          <div style={{ flex: 2, minWidth: '200px' }}>
-            <Input
-              placeholder="Search by name, type, or location..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              wrapperStyle={{ marginBottom: 0 }}
-            />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <div style={{ display: 'flex', gap: '12px', alignItems: 'center', width: '100%', flexWrap: 'wrap' }}>
+            <div style={{ flex: 2, minWidth: '240px', position: 'relative', display: 'flex', alignItems: 'center' }}>
+              <Search size={18} style={{ position: 'absolute', left: '12px', color: 'var(--text-muted)', zIndex: 1 }} />
+              <Input
+                placeholder="Search by name, type, location, manufacturer, model, S/N..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                wrapperStyle={{ marginBottom: 0, width: '100%' }}
+                style={{ paddingLeft: '38px', paddingRight: search ? '36px' : '12px' }}
+              />
+              {search && (
+                <button 
+                  onClick={() => setSearch('')}
+                  style={{
+                    position: 'absolute',
+                    right: '12px',
+                    background: 'transparent',
+                    border: 'none',
+                    color: 'var(--text-muted)',
+                    cursor: 'pointer',
+                    padding: 0,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    outline: 'none',
+                    zIndex: 1
+                  }}
+                  title="Clear search"
+                >
+                  <X size={16} />
+                </button>
+              )}
+            </div>
+
+            <div style={{ flex: 1, minWidth: '150px' }}>
+              <Select
+                options={[
+                  { value: 'all', label: 'All Statuses' },
+                  { value: 'online', label: 'Online' },
+                  { value: 'warning', label: 'Warning' },
+                  { value: 'offline', label: 'Offline' },
+                ]}
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                wrapperStyle={{ marginBottom: 0 }}
+              />
+            </div>
+
+            <div style={{ flex: 1, minWidth: '150px' }}>
+              <Select
+                options={uniqueTypes.map((type) => ({
+                  value: type,
+                  label: type === 'all' ? 'All Types / Classes' : type,
+                }))}
+                value={typeFilter}
+                onChange={(e) => setTypeFilter(e.target.value)}
+                wrapperStyle={{ marginBottom: 0 }}
+              />
+            </div>
+
+            <Button 
+              variant="secondary"
+              onClick={() => setIsFiltersExpanded(!isFiltersExpanded)}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                height: '42px',
+                borderColor: isFiltersExpanded ? 'var(--color-primary)' : 'var(--border-color)',
+                backgroundColor: isFiltersExpanded ? 'var(--bg-tertiary)' : 'transparent',
+                color: isFiltersExpanded ? 'var(--color-primary)' : 'var(--text-primary)'
+              }}
+            >
+              <SlidersHorizontal size={15} />
+              <span>Advanced Filters</span>
+              {activeFiltersCount > 0 && (
+                <span style={{
+                  backgroundColor: 'var(--color-primary)',
+                  color: 'white',
+                  fontSize: 'var(--font-size-xs)',
+                  fontWeight: 600,
+                  padding: '2px 6px',
+                  borderRadius: '10px',
+                  marginLeft: '4px',
+                  lineHeight: 1
+                }}>
+                  {activeFiltersCount}
+                </span>
+              )}
+              {isFiltersExpanded ? <ChevronUp size={14} style={{ marginLeft: '4px' }} /> : <ChevronDown size={14} style={{ marginLeft: '4px' }} />}
+            </Button>
           </div>
-          <div style={{ flex: 1, minWidth: '150px' }}>
-            <Select
-              options={[
-                { value: 'all', label: 'All Statuses' },
-                { value: 'online', label: 'Online' },
-                { value: 'warning', label: 'Warning' },
-                { value: 'offline', label: 'Offline' },
-              ]}
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              wrapperStyle={{ marginBottom: 0 }}
-            />
-          </div>
-          <div style={{ flex: 1, minWidth: '150px' }}>
-            <Select
-              options={uniqueTypes.map((type) => ({
-                value: type,
-                label: type === 'all' ? 'All Types' : type,
-              }))}
-              value={typeFilter}
-              onChange={(e) => setTypeFilter(e.target.value)}
-              wrapperStyle={{ marginBottom: 0 }}
-            />
-          </div>
+
+          {/* Expanded Drawer Panel */}
+          {isFiltersExpanded && (
+            <div style={{
+              borderTop: '1px solid var(--border-color)',
+              paddingTop: '16px',
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+              gap: '16px'
+            }}>
+              <Select
+                label="Asset Category"
+                options={[
+                  { value: 'all', label: 'All Categories' },
+                  ...categories.map((c) => ({ value: c.id, label: c.name }))
+                ]}
+                value={categoryIdFilter}
+                onChange={(e) => setCategoryIdFilter(e.target.value)}
+                wrapperStyle={{ marginBottom: 0 }}
+              />
+
+              <Select
+                label="Asset Criticality"
+                options={[
+                  { value: 'all', label: 'All Criticalities' },
+                  { value: 'low', label: 'Low' },
+                  { value: 'medium', label: 'Medium' },
+                  { value: 'high', label: 'High' },
+                  { value: 'critical', label: 'Critical' },
+                ]}
+                value={criticalityFilter}
+                onChange={(e) => setCriticalityFilter(e.target.value)}
+                wrapperStyle={{ marginBottom: 0 }}
+              />
+
+              <Input
+                label="Manufacturer"
+                placeholder="Filter by manufacturer..."
+                value={manufacturerFilter}
+                onChange={(e) => setManufacturerFilter(e.target.value)}
+                wrapperStyle={{ marginBottom: 0 }}
+              />
+
+              <Input
+                label="Location"
+                placeholder="Filter by location..."
+                value={locationFilter}
+                onChange={(e) => setLocationFilter(e.target.value)}
+                wrapperStyle={{ marginBottom: 0 }}
+              />
+            </div>
+          )}
+
+          {/* Filter Metadata Stats & Quick Reset Row */}
+          {activeFiltersCount > 0 && (
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              borderTop: '1px solid var(--border-color)',
+              paddingTop: '12px',
+              marginTop: '4px'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: 'var(--font-size-sm)', color: 'var(--text-secondary)' }}>
+                <span>Active Filters:</span>
+                <span style={{
+                  backgroundColor: 'var(--badge-primary-bg)',
+                  color: 'var(--badge-primary-text)',
+                  border: '1px solid var(--badge-primary-border)',
+                  fontSize: 'var(--font-size-xs)',
+                  fontWeight: 600,
+                  padding: '2px 8px',
+                  borderRadius: 'var(--radius-pill)'
+                }}>
+                  {activeFiltersCount} applied
+                </span>
+                <span>&bull;</span>
+                <span>Matched: <strong>{filteredData.length}</strong> / {data.length} assets</span>
+              </div>
+              <Button 
+                variant="secondary" 
+                size="sm"
+                onClick={handleResetFilters}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 12px' }}
+              >
+                <RotateCcw size={13} />
+                <span>Reset Filters</span>
+              </Button>
+            </div>
+          )}
         </div>
       </Card>
 
