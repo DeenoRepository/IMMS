@@ -5,6 +5,7 @@ import { AppLayout } from '../layout/AppLayout';
 import { Login } from '../pages/Login';
 import { Dashboard } from '../pages/Dashboard';
 import { Equipment } from '../pages/Equipment';
+import { Maintenance } from '../pages/Maintenance';
 
 // Route Guards
 const RequireAuth: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -23,12 +24,7 @@ const RequireRole: React.FC<{ children: React.ReactNode; allowedRoles?: UserRole
 
 // Module Placeholder Components
 
-const MaintenancePlaceholder = () => (
-  <div className="module-placeholder">
-    <h2>Maintenance (PPR) Module</h2>
-    <p>This is a placeholder for the maintenance and repairs planning module.</p>
-  </div>
-);
+
 
 const WarehousePlaceholder = () => (
   <div className="module-placeholder">
@@ -81,7 +77,7 @@ export const AppRoutes: React.FC = () => {
           path="maintenance" 
           element={
             <RequireRole allowedRoles={['mechanic', 'chief_mechanic', 'admin']}>
-              <MaintenancePlaceholder />
+              <Maintenance />
             </RequireRole>
           } 
         />

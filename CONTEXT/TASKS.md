@@ -237,3 +237,38 @@ Build the Equipment view on the frontend, integrating list table, CRUD forms ins
 ### Notes
 None.
 
+---
+
+## Task ID: task-backend-maintenance
+Title: Maintenance Backend CRUD API
+Status: done
+Priority: high
+Dependencies: [task-frontend-equipment]
+
+### Description
+Implement the Maintenance entity, DTOs, CRUD service (with db seed), and controller with JWT and RBAC guards.
+
+### Checklist
+- [x] Implement Maintenance TypeORM Entity and relation to Equipment
+- [x] Implement validation DTOs (CreateMaintenanceDto and UpdateMaintenanceDto)
+- [x] Implement MaintenanceService with database seeding logic
+- [x] Implement MaintenanceController with secured endpoints
+- [x] Register MaintenanceModule in app.module.ts and verify build
+
+---
+
+## Task ID: task-frontend-maintenance
+Title: Maintenance Frontend Module
+Status: done
+Priority: high
+Dependencies: [task-backend-maintenance]
+
+### Description
+Build the Maintenance list page, metrics headers, scheduling form modal, and route routing.
+
+### Checklist
+- [x] Implement Maintenance.tsx dashboard page using @core/ui Table, filters, and metrics
+- [x] Implement MaintenanceModal.tsx with role restrictions
+- [x] Register path="maintenance" to use the new Maintenance view in AppRoutes.tsx
+- [x] Verify functionality (CRUD under different roles) and verify full workspace build
+

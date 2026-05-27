@@ -8,6 +8,7 @@
 - Frontend Shell application initialized under `/system/frontend` with dynamic routing, Zustand auth and module stores, App Layout (Sidebar + Header), and core views (Login + Dashboard).
 - Backend API initialized under `/system/backend` using NestJS, integrated with TypeORM/PostgreSQL connection pooling, and configured with JWT validation and RBAC guards (roles: `mechanic`, `chief_mechanic`, `warehouse_manager`, `admin`).
 - Equipment Management module fully implemented with NestJS CRUD endpoints and React dashboard/CRUD modal views.
+- Maintenance Management (PPR / Repairs) module fully implemented with NestJS CRUD endpoints and React dashboard/CRUD modal views.
 
 ## Completed Tasks
 - `task-monorepo-init`: Monorepo Workspace Setup
@@ -22,3 +23,5 @@
 - `task-ui-controls`: Design System Controls Extension
 - `task-backend-equipment`: Equipment Backend CRUD API
 - `task-frontend-equipment`: Equipment Frontend Module
+- `task-backend-maintenance`: Maintenance Backend CRUD API
+- `task-frontend-maintenance`: Maintenance Frontend Module
