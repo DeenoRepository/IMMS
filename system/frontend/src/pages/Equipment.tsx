@@ -1,9 +1,23 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { useAuthStore } from '../store/authStore';
-import { Card, Button, Input, Select, Table, EquipmentStatusIndicator } from '@core/ui';
+import { Card, Button, Input, Select, Table, EquipmentStatusIndicator, MaintenancePriorityTag, Modal, Tabs } from '@core/ui';
 import api from '../utils/api';
 import { EquipmentModal, type EquipmentFormValues } from './EquipmentModal';
-import { Plus, Trash2, Edit, RefreshCw } from 'lucide-react';
+import { Plus, Trash2, Edit, RefreshCw, Settings } from 'lucide-react';
+
+interface CategoryAttribute {
+  id: string;
+  name: string;
+  type: string;
+  isRequired: boolean;
+}
+
+interface EquipmentCategory {
+  id: string;
+  name: string;
+  description?: string;
+  attributes: CategoryAttribute[];
+}
 
 interface EquipmentItem {
   id: string;
@@ -12,6 +26,31 @@ interface EquipmentItem {
   location: string;
   status: 'online' | 'warning' | 'offline';
   commissioningDate: string;
+  serialNumber?: string;
+  manufacturer?: string;
+  model?: string;
+  manufactureYear?: number;
+  inventoryNumber?: string;
+  criticality?: 'low' | 'medium' | 'high' | 'critical';
+  powerKw?: number;
+  categoryId?: string;
+  category?: {
+    id: string;
+    name: string;
+    description?: string;
+  };
+  attributeValues?: Array<{
+    id: string;
+    attributeId: string;
+    value: string;
+    attribute?: {
+      id: string;
+      name: string;
+      isRequired: boolean;
+      type: string;
+    };
+  }>;
+  customFields?: Record<string, any>;
 }
 
 export const Equipment: React.FC = () => {
@@ -28,6 +67,147 @@ export const Equipment: React.FC = () => {
   // Modal states
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<EquipmentItem | undefined>(undefined);
+
+  // Category states
+  const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
+  const [categories, setCategories] = useState<EquipmentCategory[]>([]);
+  const [selectedCatForEdit, setSelectedCatForEdit] = useState<EquipmentCategory | null>(null);
+  const [catName, setCatName] = useState('');
+  const [catDesc, setCatDesc] = useState('');
+  const [catAttrs, setCatAttrs] = useState<Array<{ name: string; type: string; isRequired: boolean }>>([]);
+  const [newAttrName, setNewAttrName] = useState('');
+  const [newAttrType, setNewAttrType] = useState('string');
+  const [newAttrRequired, setNewAttrRequired] = useState(false);
+
+  // Standard template states
+  interface StandardTemplateItem {
+    fieldName: string;
+    displayName: string;
+    type: string;
+    isVisible: boolean;
+    isRequired: boolean;
+    isCustom: boolean;
+  }
+  const [standardTemplate, setStandardTemplate] = useState<StandardTemplateItem[]>([]);
+  const [templateConfigs, setTemplateConfigs] = useState<StandardTemplateItem[]>([]);
+  const [managerTab, setManagerTab] = useState('categories');
+
+  const [newFieldCode, setNewFieldCode] = useState('');
+  const [newFieldLabel, setNewFieldLabel] = useState('');
+  const [newFieldType, setNewFieldType] = useState('string');
+
+  const [requiredDocs, setRequiredDocs] = useState<Array<{ id: string; documentType: string; categoryId: string | null }>>([]);
+  const [newReqDocType, setNewReqDocType] = useState('');
+  const [newReqDocCategoryId, setNewReqDocCategoryId] = useState('');
+
+  const [allowedExtensions, setAllowedExtensions] = useState('');
+  const [maxFileSizeMb, setMaxFileSizeMb] = useState(10);
+
+  const fieldLabelMap: Record<string, string> = {
+    serialNumber: 'Serial Number',
+    manufacturer: 'Manufacturer',
+    model: 'Model',
+    manufactureYear: 'Manufacture Year',
+    inventoryNumber: 'Inventory Number',
+    powerKw: 'Power Rating (kW)',
+    commissioningDate: 'Commissioning Date',
+    criticality: 'Criticality Level',
+  };
+
+  const fetchStandardTemplate = async () => {
+    try {
+      const response = await api.get<StandardTemplateItem[]>('/equipment/standard-template');
+      setStandardTemplate(response.data);
+      setTemplateConfigs(response.data);
+    } catch (err) {
+      console.error('Failed to load standard template', err);
+    }
+  };
+
+  const fetchCategories = async () => {
+    try {
+      const response = await api.get<EquipmentCategory[]>('/equipment/categories/all');
+      setCategories(response.data);
+    } catch (err) {
+      console.error('Failed to load categories', err);
+    }
+  };
+
+  const fetchRequiredDocs = async () => {
+    try {
+      const response = await api.get('/equipment/required-documents');
+      setRequiredDocs(response.data);
+    } catch (err) {
+      console.error('Failed to load required document templates', err);
+    }
+  };
+
+  const handleAddRequiredDoc = async () => {
+    if (!newReqDocType.trim()) {
+      alert('Document Type is required!');
+      return;
+    }
+    try {
+      await api.post('/equipment/required-documents', {
+        documentType: newReqDocType.trim(),
+        categoryId: newReqDocCategoryId || null
+      });
+      setNewReqDocType('');
+      setNewReqDocCategoryId('');
+      fetchRequiredDocs();
+    } catch (err: any) {
+      alert(err.response?.data?.message || 'Failed to add mandatory document template.');
+    }
+  };
+
+  const handleDeleteRequiredDoc = async (id: string, name: string) => {
+    if (!window.confirm(`Are you sure you want to delete mandatory document rule for "${name}"?`)) return;
+    try {
+      await api.delete(`/equipment/required-documents/${id}`);
+      fetchRequiredDocs();
+    } catch (err: any) {
+      alert(err.response?.data?.message || 'Failed to delete mandatory document template.');
+    }
+  };
+
+  const fetchUploadSettings = async () => {
+    try {
+      const response = await api.get('/equipment/upload-settings');
+      setAllowedExtensions(response.data.allowedExtensions);
+      setMaxFileSizeMb(response.data.maxFileSizeMb);
+    } catch (err) {
+      console.error('Failed to fetch upload settings', err);
+    }
+  };
+
+  const handleSaveUploadSettings = async () => {
+    if (!allowedExtensions.trim()) {
+      alert('Allowed extensions cannot be empty!');
+      return;
+    }
+    if (maxFileSizeMb <= 0) {
+      alert('Max file size must be a positive number!');
+      return;
+    }
+
+    try {
+      await api.put('/equipment/upload-settings', {
+        allowedExtensions: allowedExtensions.trim(),
+        maxFileSizeMb: Number(maxFileSizeMb)
+      });
+      alert('Document upload settings saved successfully!');
+      fetchUploadSettings();
+    } catch (err: any) {
+      alert(err.response?.data?.message || 'Failed to save document upload settings.');
+    }
+  };
+
+  useEffect(() => {
+    fetchCategories();
+    fetchStandardTemplate();
+    fetchRequiredDocs();
+    fetchUploadSettings();
+  }, []);
 
   // Sorting
   const [sortBy, setSortBy] = useState<string>('name');
@@ -119,6 +299,396 @@ export const Equipment: React.FC = () => {
     return { total, online, warning, offline };
   }, [data]);
 
+  const handleEditCategory = (cat: EquipmentCategory) => {
+    setSelectedCatForEdit(cat);
+    setCatName(cat.name);
+    setCatDesc(cat.description || '');
+    setCatAttrs(cat.attributes.map(a => ({ name: a.name, type: a.type, isRequired: a.isRequired })));
+  };
+
+  const handleAddNewCategoryClick = () => {
+    setSelectedCatForEdit({ id: '', name: '', description: '', attributes: [] });
+    setCatName('');
+    setCatDesc('');
+    setCatAttrs([]);
+  };
+
+  const handleAddAttribute = () => {
+    if (!newAttrName.trim()) return;
+    setCatAttrs([...catAttrs, { name: newAttrName, type: newAttrType, isRequired: newAttrRequired }]);
+    setNewAttrName('');
+    setNewAttrType('string');
+    setNewAttrRequired(false);
+  };
+
+  const handleRemoveAttribute = (idx: number) => {
+    setCatAttrs(catAttrs.filter((_, i) => i !== idx));
+  };
+
+  const handleSaveCategory = async () => {
+    if (!catName.trim()) {
+      alert('Category Name is required');
+      return;
+    }
+    const payload = {
+      name: catName,
+      description: catDesc || undefined,
+      attributes: catAttrs,
+    };
+
+    try {
+      if (selectedCatForEdit && selectedCatForEdit.id) {
+        await api.put(`/equipment/categories/${selectedCatForEdit.id}`, payload);
+      } else {
+        await api.post('/equipment/categories', payload);
+      }
+      fetchCategories();
+      setSelectedCatForEdit(null);
+    } catch (err: any) {
+      alert(err.response?.data?.message || 'Failed to save category');
+    }
+  };
+
+  const handleDeleteCategory = async (catId: string) => {
+    if (!window.confirm('Are you sure you want to delete this category? All attributes will be deleted, and equipment assigned to it will be set to no category.')) return;
+    try {
+      await api.delete(`/equipment/categories/${catId}`);
+      fetchCategories();
+      fetchData(); // Reload main equipment list
+    } catch (err: any) {
+      alert(err.response?.data?.message || 'Failed to delete category');
+    }
+  };
+
+  const handleTemplateCheckboxChange = (fieldName: string, prop: 'isVisible' | 'isRequired', checked: boolean) => {
+    setTemplateConfigs((prev) =>
+      prev.map((item) => {
+        if (item.fieldName === fieldName) {
+          const updated = { ...item, [prop]: checked };
+          if (prop === 'isVisible' && !checked) {
+            updated.isRequired = false;
+          }
+          return updated;
+        }
+        return item;
+      })
+    );
+  };
+
+  const handleSaveTemplates = async () => {
+    try {
+      const response = await api.put<StandardTemplateItem[]>('/equipment/standard-template', templateConfigs);
+      setStandardTemplate(response.data);
+      setTemplateConfigs(response.data);
+      alert('Standard field template configuration saved successfully!');
+    } catch (err: any) {
+      alert(err.response?.data?.message || 'Failed to save template configuration.');
+    }
+  };
+
+  const handleAddCustomField = async () => {
+    if (!newFieldCode.trim() || !newFieldLabel.trim()) {
+      alert('Field Code and Display Name are required!');
+      return;
+    }
+    if (!/^[a-zA-Z][a-zA-Z0-9_]*$/.test(newFieldCode)) {
+      alert('Field Code must start with a letter and contain only alphanumeric characters or underscores.');
+      return;
+    }
+
+    try {
+      await api.post('/equipment/standard-template', {
+        fieldName: newFieldCode,
+        displayName: newFieldLabel,
+        type: newFieldType,
+        isVisible: true,
+        isRequired: false,
+      });
+      setNewFieldCode('');
+      setNewFieldLabel('');
+      setNewFieldType('string');
+      fetchStandardTemplate();
+    } catch (err: any) {
+      alert(err.response?.data?.message || 'Failed to add custom field.');
+    }
+  };
+
+  const handleDeleteCustomField = async (fieldName: string) => {
+    if (!window.confirm(`Are you sure you want to delete standard field "${fieldName}"?`)) return;
+    try {
+      await api.delete(`/equipment/standard-template/${fieldName}`);
+      fetchStandardTemplate();
+    } catch (err: any) {
+      alert(err.response?.data?.message || 'Failed to delete custom field.');
+    }
+  };
+
+  const templatesContent = (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-md)' }}>
+      <p style={{ color: 'var(--text-secondary)', margin: 0, fontSize: 'var(--font-size-sm)' }}>
+        Configure standard fields visibility and mandatory status across the equipment registry. System-critical fields (Name, Type, Location) are permanently visible and required.
+      </p>
+
+      {isWriteAllowed && (
+        <Card style={{ padding: 'var(--space-sm)', backgroundColor: 'var(--bg-secondary)', border: '1px dashed var(--border-color)', marginBottom: 'var(--space-xs)' }}>
+          <h5 style={{ margin: '0 0 var(--space-xs) 0', fontSize: 'var(--font-size-sm)', fontWeight: 600 }}>Create New Standard Field</h5>
+          <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-end', flexWrap: 'wrap' }}>
+            <div style={{ flex: 1, minWidth: '120px' }}>
+              <Input
+                label="Field Code (e.g. weight)"
+                value={newFieldCode}
+                onChange={(e) => setNewFieldCode(e.target.value)}
+                placeholder="weight"
+                style={{ marginBottom: 0 }}
+              />
+            </div>
+            <div style={{ flex: 1.5, minWidth: '150px' }}>
+              <Input
+                label="Display Label"
+                value={newFieldLabel}
+                onChange={(e) => setNewFieldLabel(e.target.value)}
+                placeholder="Weight (kg)"
+                style={{ marginBottom: 0 }}
+              />
+            </div>
+            <div style={{ flex: 1, minWidth: '100px' }}>
+              <Select
+                label="Data Type"
+                options={[
+                  { value: 'string', label: 'Text/String' },
+                  { value: 'number', label: 'Numeric/Number' },
+                  { value: 'date', label: 'Date' },
+                ]}
+                value={newFieldType}
+                onChange={(e) => setNewFieldType(e.target.value)}
+                style={{ marginBottom: 0 }}
+              />
+            </div>
+            <Button variant="primary" onClick={handleAddCustomField} size="sm" style={{ height: '36px' }}>
+              Add Field
+            </Button>
+          </div>
+        </Card>
+      )}
+      
+      <div style={{ 
+        display: 'flex', 
+        flexDirection: 'column', 
+        gap: 'var(--space-xs)',
+        maxHeight: '350px',
+        overflowY: 'auto',
+        border: '1px solid var(--border-color)',
+        borderRadius: 'var(--radius-md)',
+        backgroundColor: 'var(--bg-secondary)',
+        padding: 'var(--space-sm)'
+      }}>
+        {templateConfigs.map((config) => (
+          <div key={config.fieldName} style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            padding: 'var(--space-xs) var(--space-sm)',
+            backgroundColor: 'var(--bg-primary)',
+            borderRadius: 'var(--radius-sm)',
+            border: '1px solid var(--border-color)'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div style={{ fontWeight: 600, fontSize: 'var(--font-size-sm)' }}>
+                {config.displayName || fieldLabelMap[config.fieldName] || config.fieldName}
+              </div>
+              {config.isCustom && (
+                <span style={{ 
+                  fontSize: 'var(--font-size-xxs)', 
+                  backgroundColor: 'var(--border-color)', 
+                  padding: '2px 6px', 
+                  borderRadius: '10px',
+                  color: 'var(--text-secondary)'
+                }}>
+                  Custom ({config.type})
+                </span>
+              )}
+            </div>
+            <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: 'var(--font-size-xs)', cursor: 'pointer', margin: 0 }}>
+                <input
+                  type="checkbox"
+                  checked={config.isVisible}
+                  onChange={(e) => handleTemplateCheckboxChange(config.fieldName, 'isVisible', e.target.checked)}
+                />
+                Visible
+              </label>
+              <label style={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: '6px', 
+                fontSize: 'var(--font-size-xs)', 
+                cursor: 'pointer',
+                opacity: config.isVisible ? 1 : 0.5,
+                margin: 0
+              }}>
+                <input
+                  type="checkbox"
+                  checked={config.isRequired}
+                  disabled={!config.isVisible}
+                  onChange={(e) => handleTemplateCheckboxChange(config.fieldName, 'isRequired', e.target.checked)}
+                />
+                Required
+              </label>
+              {config.isCustom && (
+                <Button 
+                  variant="danger" 
+                  size="sm" 
+                  onClick={() => handleDeleteCustomField(config.fieldName)}
+                  style={{ padding: '2px 8px', minHeight: 'auto', height: '24px' }}
+                >
+                  Delete
+                </Button>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+      
+      <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 'var(--space-xs)' }}>
+        <Button variant="primary" onClick={handleSaveTemplates} glow>
+          Save Template Config
+        </Button>
+      </div>
+    </div>
+  );
+
+  const mandatoryDocsContent = (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-md)' }}>
+      <p style={{ color: 'var(--text-secondary)', margin: 0, fontSize: 'var(--font-size-sm)' }}>
+        Configure mandatory document attachments (e.g. User Manual) that must be uploaded for equipment passports. Default templates apply globally; category-specific templates apply only to assets of that category.
+      </p>
+
+      {isWriteAllowed && (
+        <Card style={{ padding: 'var(--space-sm)', backgroundColor: 'var(--bg-secondary)', border: '1px dashed var(--border-color)', marginBottom: 'var(--space-xs)' }}>
+          <h5 style={{ margin: '0 0 var(--space-xs) 0', fontSize: 'var(--font-size-sm)', fontWeight: 600 }}>Create New Document Rule</h5>
+          <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-end', flexWrap: 'wrap' }}>
+            <div style={{ flex: 1.5, minWidth: '150px' }}>
+              <Input
+                label="Required Document Type (e.g. Safety Certificate)"
+                value={newReqDocType}
+                onChange={(e) => setNewReqDocType(e.target.value)}
+                placeholder="User Manual"
+                style={{ marginBottom: 0 }}
+              />
+            </div>
+            <div style={{ flex: 1.2, minWidth: '120px' }}>
+              <Select
+                label="Category Scope"
+                options={[
+                  { value: '', label: 'Apply to All (Global)' },
+                  ...categories.map(c => ({ value: c.id, label: c.name }))
+                ]}
+                value={newReqDocCategoryId}
+                onChange={(e) => setNewReqDocCategoryId(e.target.value)}
+                style={{ marginBottom: 0 }}
+              />
+            </div>
+            <Button variant="primary" onClick={handleAddRequiredDoc} size="sm" style={{ height: '36px' }}>
+              Add Rule
+            </Button>
+          </div>
+        </Card>
+      )}
+
+      <div style={{ 
+        display: 'flex', 
+        flexDirection: 'column', 
+        gap: 'var(--space-xs)',
+        maxHeight: '300px',
+        overflowY: 'auto',
+        border: '1px solid var(--border-color)',
+        borderRadius: 'var(--radius-md)',
+        backgroundColor: 'var(--bg-secondary)',
+        padding: 'var(--space-sm)'
+      }}>
+        {requiredDocs.length === 0 ? (
+          <p style={{ textAlign: 'center', color: 'var(--text-secondary)', fontStyle: 'italic', margin: 'var(--space-md) 0' }}>
+            No mandatory document requirements defined.
+          </p>
+        ) : (
+          requiredDocs.map((rule) => {
+            const catName = rule.categoryId ? categories.find(c => c.id === rule.categoryId)?.name || 'Unknown Category' : 'Global (All)';
+            return (
+              <div key={rule.id} style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                padding: 'var(--space-xs) var(--space-sm)',
+                backgroundColor: 'var(--bg-primary)',
+                borderRadius: 'var(--radius-sm)',
+                border: '1px solid var(--border-color)'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <div style={{ fontWeight: 600, fontSize: 'var(--font-size-sm)' }}>
+                    {rule.documentType}
+                  </div>
+                  <span style={{ 
+                    fontSize: 'var(--font-size-xxs)', 
+                    backgroundColor: 'var(--border-color)', 
+                    padding: '2px 6px', 
+                    borderRadius: '10px',
+                    color: 'var(--text-secondary)'
+                  }}>
+                    Scope: {catName}
+                  </span>
+                </div>
+                {isWriteAllowed && (
+                  <Button 
+                    variant="danger" 
+                    size="sm" 
+                    onClick={() => handleDeleteRequiredDoc(rule.id, rule.documentType)}
+                    style={{ padding: '2px 8px', minHeight: 'auto', height: '24px' }}
+                  >
+                    Delete
+                  </Button>
+                )}
+              </div>
+            );
+          })
+        )}
+      </div>
+    </div>
+  );
+
+  const uploadSettingsContent = (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-md)' }}>
+      <p style={{ color: 'var(--text-secondary)', margin: 0, fontSize: 'var(--font-size-sm)' }}>
+        Configure constraints for technical document passport uploads. These rules are enforced both client-side and server-side to maintain server security and disk space limits.
+      </p>
+
+      <Card style={{ padding: 'var(--space-md)', display: 'flex', flexDirection: 'column', gap: 'var(--space-sm)' }}>
+        <Input
+          label="Allowed File Extensions (comma-separated, e.g. pdf, docx, png)"
+          value={allowedExtensions}
+          onChange={(e) => setAllowedExtensions(e.target.value)}
+          placeholder="pdf, docx, xlsx, png, jpg, jpeg, zip, txt"
+        />
+
+        <Input
+          label="Maximum File Size Limit (MB)"
+          type="number"
+          min="1"
+          value={String(maxFileSizeMb)}
+          onChange={(e) => setMaxFileSizeMb(Number(e.target.value))}
+          placeholder="10"
+        />
+
+        {isWriteAllowed && (
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 'var(--space-xs)' }}>
+            <Button variant="primary" onClick={handleSaveUploadSettings} glow>
+              Save Upload Settings
+            </Button>
+          </div>
+        )}
+      </Card>
+    </div>
+  );
+
   // Filter and sort data
   const filteredData = useMemo(() => {
     return data
@@ -126,7 +696,12 @@ export const Equipment: React.FC = () => {
         const matchesSearch =
           item.name.toLowerCase().includes(search.toLowerCase()) ||
           item.location.toLowerCase().includes(search.toLowerCase()) ||
-          item.type.toLowerCase().includes(search.toLowerCase());
+          item.type.toLowerCase().includes(search.toLowerCase()) ||
+          (item.category && item.category.name.toLowerCase().includes(search.toLowerCase())) ||
+          (item.serialNumber && item.serialNumber.toLowerCase().includes(search.toLowerCase())) ||
+          (item.inventoryNumber && item.inventoryNumber.toLowerCase().includes(search.toLowerCase())) ||
+          (item.manufacturer && item.manufacturer.toLowerCase().includes(search.toLowerCase())) ||
+          (item.model && item.model.toLowerCase().includes(search.toLowerCase()));
         const matchesStatus = statusFilter === 'all' || item.status === statusFilter;
         const matchesType = typeFilter === 'all' || item.type === typeFilter;
         return matchesSearch && matchesStatus && matchesType;
@@ -141,27 +716,69 @@ export const Equipment: React.FC = () => {
   }, [data, search, statusFilter, typeFilter, sortBy, sortDirection]);
 
   // Table columns definition
-  const columns = [
-    {
-      key: 'status',
-      header: 'Status',
-      sortable: true,
-      render: (row: EquipmentItem) => <EquipmentStatusIndicator status={row.status} />,
-    },
-    { key: 'name', header: 'Name', sortable: true },
-    { key: 'type', header: 'Type / Class', sortable: true },
-    { key: 'location', header: 'Location', sortable: true },
-    {
-      key: 'commissioningDate',
-      header: 'Commissioned On',
-      sortable: true,
-      render: (row: EquipmentItem) => new Date(row.commissioningDate).toLocaleDateString(),
-    },
-    {
+  const columns = useMemo(() => {
+    const isCriticalityVisible = standardTemplate.find(t => t.fieldName === 'criticality')?.isVisible !== false;
+    const isCommissioningDateVisible = standardTemplate.find(t => t.fieldName === 'commissioningDate')?.isVisible !== false;
+
+    const cols = [
+      {
+        key: 'status',
+        header: 'Status',
+        sortable: true,
+        render: (row: EquipmentItem) => <EquipmentStatusIndicator status={row.status} />,
+      },
+      { key: 'name', header: 'Name', sortable: true },
+      { 
+        key: 'type', 
+        header: 'Type / Class', 
+        sortable: true,
+        render: (row: EquipmentItem) => row.category?.name || row.type
+      },
+      { key: 'location', header: 'Location', sortable: true },
+    ];
+
+    if (isCriticalityVisible) {
+      cols.push({
+        key: 'criticality',
+        header: 'Criticality',
+        sortable: true,
+        render: (row: EquipmentItem) => (
+          <MaintenancePriorityTag priority={row.criticality || 'medium'} />
+        ),
+      } as any);
+    }
+
+    if (isCommissioningDateVisible) {
+      cols.push({
+        key: 'commissioningDate',
+        header: 'Commissioned On',
+        sortable: true,
+        render: (row: EquipmentItem) => row.commissioningDate ? new Date(row.commissioningDate).toLocaleDateString() : 'N/A',
+      } as any);
+    }
+
+    // Add custom standard fields that are visible
+    standardTemplate.forEach((temp) => {
+      if (temp.isCustom && temp.isVisible) {
+        cols.push({
+          key: temp.fieldName,
+          header: temp.displayName || temp.fieldName,
+          sortable: true,
+          render: (row: EquipmentItem) => {
+            const val = row.customFields?.[temp.fieldName];
+            if (val === undefined || val === null) return 'N/A';
+            if (temp.type === 'date') return new Date(val).toLocaleDateString();
+            return String(val);
+          }
+        } as any);
+      }
+    });
+
+    cols.push({
       key: 'actions',
       header: 'Actions',
       render: (row: EquipmentItem) => (
-        <div style={{ display: 'flex', gap: '8px' }}>
+        <div style={{ display: 'flex', gap: '8px' }} onClick={(e) => e.stopPropagation()}>
           <Button variant="secondary" size="sm" onClick={() => handleOpenEditModal(row)} title="Edit">
             <Edit size={14} />
           </Button>
@@ -172,8 +789,10 @@ export const Equipment: React.FC = () => {
           )}
         </div>
       ),
-    },
-  ];
+    } as any);
+
+    return cols;
+  }, [standardTemplate, isWriteAllowed]);
 
   return (
     <div className="equipment-view" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-lg)' }}>
@@ -189,10 +808,20 @@ export const Equipment: React.FC = () => {
             <RefreshCw size={16} />
           </Button>
           {isWriteAllowed && (
-            <Button variant="primary" onClick={handleOpenAddModal} glow>
-              <Plus size={16} style={{ marginRight: '6px' }} />
-              Add Equipment
-            </Button>
+            <>
+              <Button variant="secondary" onClick={() => {
+                setTemplateConfigs([...standardTemplate]);
+                setManagerTab('categories');
+                setIsCategoryModalOpen(true);
+              }}>
+                <Settings size={16} style={{ marginRight: '6px' }} />
+                Categories & Templates
+              </Button>
+              <Button variant="primary" onClick={handleOpenAddModal} glow>
+                <Plus size={16} style={{ marginRight: '6px' }} />
+                Add Equipment
+              </Button>
+            </>
           )}
         </div>
       </div>
@@ -285,6 +914,214 @@ export const Equipment: React.FC = () => {
         title={selectedItem ? 'Edit Asset Parameters' : 'Add New Machinery Asset'}
         isOnlyStatusAllowed={user?.role === 'mechanic'}
       />
+
+      {/* Category & Template Manager Modal */}
+      <Modal
+        isOpen={isCategoryModalOpen}
+        onClose={() => {
+          setIsCategoryModalOpen(false);
+          setSelectedCatForEdit(null);
+          setManagerTab('categories');
+        }}
+        title="Category & Template Manager"
+        size="lg"
+        footer={(
+          <Button variant="secondary" onClick={() => {
+            setIsCategoryModalOpen(false);
+            setSelectedCatForEdit(null);
+            setManagerTab('categories');
+          }}>
+            Close
+          </Button>
+        )}
+      >
+        {selectedCatForEdit ? (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-md)' }}>
+            <h3 style={{ margin: 0, fontSize: 'var(--font-size-md)' }}>
+              {selectedCatForEdit.id ? 'Edit Category Specifications' : 'Create New Category'}
+            </h3>
+            <Input
+              label="Category Name"
+              value={catName}
+              onChange={(e) => setCatName(e.target.value)}
+              required
+              placeholder="e.g. Turbine, CNC Machine"
+            />
+            <Input
+              label="Category Description"
+              value={catDesc}
+              onChange={(e) => setCatDesc(e.target.value)}
+              placeholder="Brief description of machinery type"
+            />
+            
+            <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: 'var(--space-md)' }}>
+              <h4 style={{ margin: '0 0 var(--space-xs) 0', fontSize: 'var(--font-size-sm)', fontWeight: 600 }}>
+                Define Category Parameters (Attributes)
+              </h4>
+              
+              {catAttrs.length === 0 ? (
+                <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--font-size-sm)', fontStyle: 'italic', margin: '0 0 var(--space-md) 0' }}>
+                  No custom parameters defined yet. Add some below.
+                </p>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginBottom: 'var(--space-md)' }}>
+                  {catAttrs.map((attr, idx) => (
+                    <div key={idx} style={{ 
+                      display: 'flex', 
+                      justifyContent: 'space-between', 
+                      alignItems: 'center',
+                      padding: 'var(--space-xs) var(--space-sm)',
+                      backgroundColor: 'var(--bg-secondary)',
+                      borderRadius: 'var(--radius-sm)',
+                      border: '1px solid var(--border-color)',
+                      fontSize: 'var(--font-size-sm)'
+                    }}>
+                      <div>
+                        <strong>{attr.name}</strong>{' '}
+                        <span style={{ color: 'var(--text-muted)', fontSize: 'var(--font-size-xs)' }}>
+                          ({attr.type === 'number' ? 'Numeric' : 'Text'} &bull; {attr.isRequired ? 'Mandatory' : 'Optional'})
+                        </span>
+                      </div>
+                      <Button variant="danger" size="sm" onClick={() => handleRemoveAttribute(idx)}>
+                        Remove
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <Card style={{ padding: 'var(--space-sm)', backgroundColor: 'var(--bg-secondary)', border: '1px dashed var(--border-color)' }}>
+                <h5 style={{ margin: '0 0 var(--space-xs) 0', fontSize: 'var(--font-size-sm)', fontWeight: 600 }}>Add Parameter</h5>
+                <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-end', flexWrap: 'wrap' }}>
+                  <div style={{ flex: 2, minWidth: '150px' }}>
+                    <Input
+                      label="Parameter Name"
+                      value={newAttrName}
+                      onChange={(e) => setNewAttrName(e.target.value)}
+                      placeholder="e.g. Max Spindle RPM"
+                      style={{ marginBottom: 0 }}
+                    />
+                  </div>
+                  <div style={{ flex: 1, minWidth: '100px' }}>
+                    <Select
+                      label="Data Type"
+                      options={[
+                        { value: 'string', label: 'Text/String' },
+                        { value: 'number', label: 'Numeric/Number' },
+                      ]}
+                      value={newAttrType}
+                      onChange={(e) => setNewAttrType(e.target.value)}
+                      style={{ marginBottom: 0 }}
+                    />
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', height: '36px', paddingBottom: '8px' }}>
+                    <input
+                      type="checkbox"
+                      id="newAttrReq"
+                      checked={newAttrRequired}
+                      onChange={(e) => setNewAttrRequired(e.target.checked)}
+                    />
+                    <label htmlFor="newAttrReq" style={{ fontSize: 'var(--font-size-xs)', fontWeight: 500, cursor: 'pointer' }}>
+                      Required (Mandatory)
+                    </label>
+                  </div>
+                  <Button variant="secondary" onClick={handleAddAttribute}>
+                    Add
+                  </Button>
+                </div>
+              </Card>
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: 'var(--space-md)' }}>
+              <Button variant="secondary" onClick={() => setSelectedCatForEdit(null)}>
+                Back to List
+              </Button>
+              <Button variant="primary" onClick={handleSaveCategory} glow>
+                Save Category
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <Tabs
+            activeTabId={managerTab}
+            onTabChange={setManagerTab}
+            tabs={[
+              {
+                id: 'categories',
+                label: 'Equipment Categories',
+                content: (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-md)', marginTop: 'var(--space-md)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <p style={{ color: 'var(--text-secondary)', margin: 0, fontSize: 'var(--font-size-sm)' }}>
+                        Define dynamic mandatory/auxiliary parameters for each machinery category.
+                      </p>
+                      <Button variant="primary" size="sm" onClick={handleAddNewCategoryClick}>
+                        <Plus size={14} style={{ marginRight: '4px' }} /> Create Category
+                      </Button>
+                    </div>
+
+                    {categories.length === 0 ? (
+                      <div style={{ textAlign: 'center', color: 'var(--text-secondary)', padding: 'var(--space-lg)' }}>
+                        No custom categories created yet.
+                      </div>
+                    ) : (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-xs)', maxHeight: '300px', overflowY: 'auto' }}>
+                        {categories.map(cat => (
+                          <Card key={cat.id} style={{ padding: 'var(--space-sm) var(--space-md)' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                              <div>
+                                <h4 style={{ margin: 0 }}>{cat.name}</h4>
+                                <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--font-size-xs)', margin: '4px 0 0 0' }}>
+                                  {cat.description || 'No description'} &bull; {cat.attributes.length} parameters defined
+                                </p>
+                              </div>
+                              <div style={{ display: 'flex', gap: '8px' }}>
+                                <Button variant="secondary" size="sm" onClick={() => handleEditCategory(cat)}>
+                                  Edit
+                                </Button>
+                                <Button variant="danger" size="sm" onClick={() => handleDeleteCategory(cat.id)}>
+                                  Delete
+                                </Button>
+                              </div>
+                            </div>
+                          </Card>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )
+              },
+              {
+                id: 'templates',
+                label: 'Standard Fields Template',
+                content: (
+                  <div style={{ marginTop: 'var(--space-md)' }}>
+                    {templatesContent}
+                  </div>
+                )
+              },
+              {
+                id: 'mandatoryDocs',
+                label: 'Mandatory Documents',
+                content: (
+                  <div style={{ marginTop: 'var(--space-md)' }}>
+                    {mandatoryDocsContent}
+                  </div>
+                )
+              },
+              {
+                id: 'uploadSettings',
+                label: 'Upload Settings',
+                content: (
+                  <div style={{ marginTop: 'var(--space-md)' }}>
+                    {uploadSettingsContent}
+                  </div>
+                )
+              }
+            ]}
+          />
+        )}
+      </Modal>
     </div>
   );
 };

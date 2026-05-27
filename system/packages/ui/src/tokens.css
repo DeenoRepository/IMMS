@@ -1,69 +1,80 @@
 :root {
-  /* Color Palette - HSL (Hue, Saturation, Lightness) */
-  /* Base Light Theme */
-  --bg-primary: hsl(220, 25%, 98%);
-  --bg-secondary: hsl(220, 20%, 94%);
-  --bg-tertiary: hsl(220, 20%, 88%);
+  /* Color Palette - Premium Enterprise Light Theme */
+  --bg-primary: hsl(210, 20%, 98%);     /* Clean slate-white canvas */
+  --bg-secondary: hsl(0, 0%, 100%);     /* Pure white for cards, panels, layout cards */
+  --bg-tertiary: hsl(210, 30%, 96%);    /* Soft grey-blue for inputs, table headers, hovered rows */
   
-  --border-color: hsl(220, 15%, 80%);
-  --border-focus: hsl(200, 95%, 45%);
+  --border-color: hsl(214, 32%, 91%);   /* Very clean, soft border (matches tailwind border-slate-200) */
+  --border-focus: hsl(221, 83%, 53%);   /* Deep corporate blue for active inputs */
 
-  --text-primary: hsl(220, 25%, 15%);
-  --text-secondary: hsl(220, 15%, 40%);
-  --text-muted: hsl(220, 10%, 55%);
+  --text-primary: hsl(222, 47%, 11%);   /* Deep slate black (Tailwind text-slate-900) */
+  --text-secondary: hsl(215, 16%, 35%); /* Professional medium grey-slate (Tailwind text-slate-700) */
+  --text-muted: hsl(215, 16%, 57%);     /* Muted grey-slate for metadata/labels (Tailwind text-slate-500) */
 
   /* Status Colors */
-  --color-primary: hsl(200, 95%, 45%);
-  --color-primary-hover: hsl(200, 95%, 35%);
-  --color-success: hsl(142, 65%, 38%);
-  --color-success-hover: hsl(142, 65%, 28%);
-  --color-warning: hsl(35, 90%, 40%);
-  --color-warning-hover: hsl(35, 90%, 30%);
-  --color-danger: hsl(355, 75%, 48%);
-  --color-danger-hover: hsl(355, 75%, 38%);
+  --color-primary: hsl(221, 83%, 53%);        /* Royal Blue accent */
+  --color-primary-hover: hsl(221, 83%, 45%);  /* Darker blue hover */
+  --color-success: hsl(142, 72%, 29%);        /* Calm forest/emerald green */
+  --color-success-hover: hsl(142, 72%, 23%);
+  --color-warning: hsl(35, 92%, 35%);         /* Warm professional amber/ochre */
+  --color-warning-hover: hsl(35, 92%, 28%);
+  --color-danger: hsl(350, 80%, 42%);         /* Crimson red */
+  --color-danger-hover: hsl(350, 80%, 35%);
+
+  /* High Contrast Text Colors for Buttons/Badges */
+  --color-primary-text: hsl(0, 0%, 100%);
+  --color-success-text: hsl(0, 0%, 100%);
+  --color-warning-text: hsl(0, 0%, 100%);
+  --color-danger-text: hsl(0, 0%, 100%);
 
   /* Gradients */
-  --gradient-cyber: linear-gradient(135deg, hsl(200, 95%, 45%), hsl(260, 85%, 55%));
-  --gradient-glass: linear-gradient(135deg, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.3));
+  --gradient-cyber: linear-gradient(135deg, hsl(221, 83%, 53%), hsl(226, 70%, 40%)); /* Indigo to deep corporate blue */
+  --gradient-glass: linear-gradient(135deg, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.4));
 
   /* Shadows */
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.08);
-  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.12);
-  --shadow-glow: 0 0 15px rgba(0, 212, 255, 0.1);
+  --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.04), 0 1px 2px rgba(15, 23, 42, 0.06);
+  --shadow-md: 0 4px 6px -1px rgba(15, 23, 42, 0.08), 0 2px 4px -2px rgba(15, 23, 42, 0.08);
+  --shadow-lg: 0 10px 15px -3px rgba(15, 23, 42, 0.08), 0 4px 6px -4px rgba(15, 23, 42, 0.08);
+  --shadow-glow: 0 0 15px rgba(37, 99, 235, 0.08);
 }
 
 [data-theme='dark'] {
-  --bg-primary: hsl(220, 20%, 10%);
-  --bg-secondary: hsl(220, 20%, 15%);
-  --bg-tertiary: hsl(220, 20%, 20%);
+  --bg-primary: hsl(222, 47%, 7%);     /* Very dark slate/navy */
+  --bg-secondary: hsl(222, 47%, 10%);   /* Slate card background */
+  --bg-tertiary: hsl(222, 40%, 16%);    /* Lighter slate for nested headers/hover */
   
-  --border-color: hsl(220, 20%, 25%);
-  --border-focus: hsl(200, 100%, 50%);
+  --border-color: hsl(222, 30%, 18%);   /* Subtle dark border */
+  --border-focus: hsl(217, 91%, 60%);   /* Bright active border */
 
-  --text-primary: hsl(220, 20%, 95%);
-  --text-secondary: hsl(220, 15%, 70%);
-  --text-muted: hsl(220, 10%, 50%);
+  --text-primary: hsl(210, 40%, 98%);   /* Crisp white-slate text */
+  --text-secondary: hsl(215, 20%, 75%); /* Softer grey text */
+  --text-muted: hsl(215, 15%, 50%);     /* Muted metadata text */
 
   /* Status Colors */
-  --color-primary: hsl(200, 100%, 50%);
-  --color-primary-hover: hsl(200, 100%, 60%);
-  --color-success: hsl(140, 70%, 45%);
-  --color-success-hover: hsl(140, 70%, 55%);
-  --color-warning: hsl(35, 90%, 50%);
+  --color-primary: hsl(217, 91%, 60%);        /* Bright corporate blue */
+  --color-primary-hover: hsl(217, 91%, 68%);
+  --color-success: hsl(142, 70%, 45%);        /* Vibrant green */
+  --color-success-hover: hsl(142, 70%, 55%);
+  --color-warning: hsl(35, 90%, 50%);         /* Vibrant warning orange */
   --color-warning-hover: hsl(35, 90%, 60%);
-  --color-danger: hsl(355, 80%, 50%);
-  --color-danger-hover: hsl(355, 80%, 60%);
+  --color-danger: hsl(350, 80%, 52%);         /* Vibrant danger red */
+  --color-danger-hover: hsl(350, 80%, 62%);
+
+  /* High Contrast Text Colors for Buttons/Badges */
+  --color-primary-text: hsl(222, 47%, 7%);
+  --color-success-text: hsl(222, 47%, 7%);
+  --color-warning-text: hsl(222, 47%, 7%);
+  --color-danger-text: hsl(0, 0%, 100%);
 
   /* Gradients */
-  --gradient-cyber: linear-gradient(135deg, hsl(200, 100%, 50%), hsl(260, 80%, 60%));
-  --gradient-glass: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.01));
+  --gradient-cyber: linear-gradient(135deg, hsl(217, 91%, 60%), hsl(223, 80%, 48%));
+  --gradient-glass: linear-gradient(135deg, rgba(15, 23, 42, 0.8), rgba(15, 23, 42, 0.4));
 
   /* Shadows */
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.2);
-  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.3);
-  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.4);
-  --shadow-glow: 0 0 15px rgba(0, 212, 255, 0.2);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -2px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -4px rgba(0, 0, 0, 0.5);
+  --shadow-glow: 0 0 15px rgba(59, 130, 246, 0.15);
 }
 
 :root {

@@ -17,6 +17,9 @@ export class EquipmentDocument {
   @Column()
   title: string;
 
+  @Column({ name: 'document_type', default: 'Other' })
+  documentType: string;
+
   @Column({ nullable: true })
   description: string;
 

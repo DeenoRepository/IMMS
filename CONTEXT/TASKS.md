@@ -309,3 +309,232 @@ Integrate Tabbed UI layout, Document list, expansion version history timeline, d
 - [x] Implement upload forms (Create Document / Upload Version) with role restrictions
 - [x] Verify functionality (uploading, versioning, downloading) and verify clean workspace build
 
+---
+
+## Task ID: task-backend-changelog
+Title: Equipment Change Log Backend API
+Status: done
+Priority: high
+Dependencies: [task-frontend-passportization]
+
+### Description
+Implement database audit logging structure, automatic log hook on create/update/docs-change, and log query endpoints.
+
+### Checklist
+- [x] Create EquipmentChangeLog database Entity
+- [x] Register entity in equipment.module.ts
+- [x] Implement logChange helper and attach audit triggers in EquipmentService
+- [x] Expose GET /api/equipment/:id/change-log endpoint in EquipmentController
+- [x] Verify build and endpoint behavior
+
+---
+
+## Task ID: task-frontend-changelog
+Title: Equipment Change Log Frontend UI
+Status: done
+Priority: high
+Dependencies: [task-backend-changelog]
+
+### Description
+Add Change History tab and design dynamic audit timeline inside EquipmentModal.tsx.
+
+### Checklist
+- [x] Add 'Change History' tab in EquipmentModal.tsx
+- [x] Implement history log fetch call on tab activation
+- [x] Render chronological timeline event cards (with colored badges and specifications diff logs)
+- [x] Verify functionality (logs show username and details) and verify clean workspace build
+
+---
+
+## Task ID: task-backend-equipment-fields
+Title: Expand Equipment Fields Backend
+Status: done
+Priority: high
+Dependencies: [task-frontend-changelog]
+
+### Description
+Expand database columns in Equipment entity, add validations in DTOs, update DB seeds, and support audit logging for new fields.
+
+### Checklist
+- [x] Add new fields to Equipment database entity and criticality enum
+- [x] Update validations in Create/Update Equipment DTOs
+- [x] Update EquipmentService DB seeding with extended details
+- [x] Update EquipmentService update() method with audit log diffing for new fields
+- [x] Verify backend compilation
+
+---
+
+## Task ID: task-frontend-equipment-fields
+Title: Expand Equipment Fields Frontend
+Status: done
+Priority: high
+Dependencies: [task-backend-equipment-fields]
+
+### Description
+Implement layout and inputs in EquipmentModal form specs, show criticality badges in Equipment list table, and update search logic.
+
+### Checklist
+- [x] Add new properties to EquipmentFormValues interface and states
+- [x] Refactor Specifications form with two-column responsive grid inputs
+- [x] Implement read-only parameters layout for mechanic role in specs form
+- [x] Display criticality column in Equipment page list table using MaintenancePriorityTag
+- [x] Update search filter query to match new parameters
+- [x] Verify compilation and functionality
+
+---
+
+## Task ID: task-backend-equipment-categories
+Title: Implement Equipment Categories Backend
+Status: done
+Priority: high
+Dependencies: [task-frontend-equipment-fields]
+
+### Description
+Create entities for EquipmentCategory, EquipmentCategoryAttribute, and EquipmentAttributeValue. Add validations, category CRUD controller, updated seeds, and service save/validation logic.
+
+### Checklist
+- [x] Create EquipmentCategory, EquipmentCategoryAttribute, and EquipmentAttributeValue entities
+- [x] Register new entities in backend EquipmentModule
+- [x] Create CreateCategoryDto and update Create/Update Equipment DTOs
+- [x] Implement category CRUD methods and seeds in EquipmentService
+- [x] Update EquipmentService create()/update() methods to handle dynamic attributes validation and values persistence
+- [x] Expose categories API endpoints in EquipmentController
+- [x] Verify backend compilation
+
+---
+
+## Task ID: task-frontend-equipment-categories
+Title: Implement Equipment Categories Frontend
+Status: done
+Priority: high
+Dependencies: [task-backend-equipment-categories]
+
+### Description
+Implement Category Manager, dynamic form inputs with required/optional attribute validation, and table displays on frontend.
+
+### Checklist
+- [x] Implement Category Manager dialog (Admins & Chief Mechanics)
+- [x] Add Category dropdown selector to Equipment form specs
+- [x] Implement dynamic inputs loading and validation for mandatory/auxiliary attributes
+- [x] Render dynamic properties in equipment table list and read-only modal layout
+- [x] Verify frontend build and functionality
+
+---
+
+## Task ID: task-backend-equipment-template
+Title: Implement Standard Equipment Card Field Templating Backend
+Status: done
+Priority: high
+Dependencies: [task-frontend-equipment-categories]
+
+### Description
+Implement database schema, seeding, CRUD endpoints, and validation for standard equipment fields template configurations.
+
+### Checklist
+- [x] Create EquipmentStandardTemplate database entity
+- [x] Register new entity in backend EquipmentModule
+- [x] Implement CRUD service methods and database seeding of default templates
+- [x] Implement backend dynamic validation in Create/Update Equipment CRUD using the active template config
+- [x] Expose standard-template REST endpoints with JWT/RBAC guards in EquipmentController
+- [x] Verify backend compilation
+
+---
+
+## Task ID: task-frontend-equipment-template
+Title: Implement Standard Equipment Card Field Templating Frontend
+Status: done
+Priority: high
+Dependencies: [task-backend-equipment-template]
+
+### Description
+Implement settings UI to toggle standard fields' visibility and requirement status, dynamically render form fields, and filter main table columns based on the template.
+
+### Checklist
+- [x] Add Standard Fields Template tab inside Category Manager dialog (renamed to Categories & Templates Manager)
+- [x] Implement GET/PUT API client functions for standard templates
+- [x] Implement frontend form configuration editing and saving for standard fields
+- [x] Dynamically render and validate fields in EquipmentModal specs form based on template rules
+- [x] Dynamically show/hide columns in Equipment main dashboard table based on template rules
+- [x] Verify frontend build and full workspace functionality
+
+---
+
+## Task ID: task-backend-dynamic-template-fields
+Title: Implement Dynamic Template Fields Backend
+Status: done
+Priority: high
+Dependencies: [task-frontend-equipment-template]
+
+### Description
+Implement dynamic standard card field addition/deletion including database columns schema update, seeding adjustments, REST endpoints, and backend dynamic validation.
+
+### Checklist
+- [x] Update EquipmentStandardTemplate entity with type, displayName, and isCustom columns
+- [x] Add customFields JSONB column to Equipment entity
+- [x] Update DTO validations to support customFields object
+- [x] Update DB Seeding with types and display names
+- [x] Implement addStandardField and deleteStandardField methods in EquipmentService
+- [x] Update validateStandardTemplateRules and diffing logic for custom fields in EquipmentService
+- [x] Expose POST and DELETE template endpoints in EquipmentController
+- [x] Verify backend compilation
+
+---
+
+## Task ID: task-frontend-dynamic-template-fields
+Title: Implement Dynamic Template Fields Frontend
+Status: done
+Priority: high
+Dependencies: [task-backend-dynamic-template-fields]
+
+### Description
+Implement template field editor form, dynamic table list column mapping, and dynamic modal input rendering for custom fields.
+
+### Checklist
+- [x] Create UI form to add custom fields in Standard Fields Template settings tab
+- [x] Add Delete button for custom template fields in settings tab
+- [x] Implement API calls for POST and DELETE standard template fields
+- [x] Dynamically render input fields for active custom template fields in EquipmentModal Specifications form
+- [x] Map custom standard fields inside submit payload and handle validation checks in EquipmentModal
+- [x] Dynamically display visible custom standard fields in Equipment list columns
+- [x] Verify frontend build and full workspace functionality
+
+---
+
+## Task ID: task-backend-mandatory-docs
+Title: Implement Mandatory Document Templates Backend
+Status: done
+Priority: high
+Dependencies: [task-frontend-dynamic-template-fields]
+
+### Description
+Create required document entities, add migration/seeding, implement template CRUD controllers, and build document completeness validator.
+
+### Checklist
+- [x] Create EquipmentRequiredDocument database entity for mandatory document templates
+- [x] Add documentType column to EquipmentDocument entity
+- [x] Register new entity in backend EquipmentModule
+- [x] Add seed script parameters for default required documents (e.g. Technical Passport, Instruction Manual)
+- [x] Implement required-documents CRUD service methods in EquipmentService
+- [x] Expose REST endpoints with JWT/RBAC guards in EquipmentController
+- [x] Verify backend builds successfully
+
+---
+
+## Task ID: task-frontend-mandatory-docs
+Title: Implement Mandatory Document Templates Frontend
+Status: done
+Priority: high
+Dependencies: [task-backend-mandatory-docs]
+
+### Description
+Add templates manager tab in settings UI, integrate required documents checks, and show warning notifications for missing files in passport view.
+
+### Checklist
+- [x] Implement Mandatory Documents Template tab inside Category & Template Manager modal
+- [x] Add API calls to retrieve, create, and delete required document templates
+- [x] Update document upload forms to support select dropdown for required Document Type
+- [x] Implement checklist of required documents in technical passport tab showing missing ones
+- [x] Display alert/notification headers with missing document types if passport is incomplete
+- [x] Verify frontend compilation and full workspace functionality
+
+
