@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import api from '../utils/api';
 
 export type UserRole = 'mechanic' | 'chief_mechanic' | 'warehouse_manager' | 'admin';
 
@@ -12,7 +13,7 @@ interface AuthState {
   user: User | null;
   token: string | null;
   isAuthenticated: boolean;
-  login: (role: UserRole, name?: string) => void;
+  login: (role: UserRole, name?: string) => Promise<void>;
   logout: () => void;
 }
 
@@ -32,14 +33,14 @@ export const useAuthStore = create<AuthState>((set) => {
     user,
     token: savedToken || null,
     isAuthenticated: !!savedToken,
-    login: (role: UserRole, name = 'Test User') => {
-      const user: User = { id: `usr-${role}`, name, role };
-      const token = `mock-jwt-token-for-${role}`;
+    login: async (role: UserRole, name = 'Test User') => {
+      const response = await api.post('/auth/login', { username: name, role });
+      const { access_token, user: loggedUser } = response.data;
 
-      localStorage.setItem('user', JSON.stringify(user));
-      localStorage.setItem('token', token);
+      localStorage.setItem('user', JSON.stringify(loggedUser));
+      localStorage.setItem('token', access_token);
 
-      set({ user, token, isAuthenticated: true });
+      set({ user: loggedUser, token: access_token, isAuthenticated: true });
     },
     logout: () => {
       localStorage.removeItem('user');

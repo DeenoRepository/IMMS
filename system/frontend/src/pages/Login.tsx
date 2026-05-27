@@ -10,10 +10,14 @@ export const Login: React.FC = () => {
   const [username, setUsername] = useState('John Doe');
   const [role, setRole] = useState<UserRole>('mechanic');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    login(role, username);
-    navigate('/');
+    try {
+      await login(role, username);
+      navigate('/');
+    } catch (err) {
+      alert('Login failed: cannot connect to the backend server.');
+    }
   };
 
   return (
