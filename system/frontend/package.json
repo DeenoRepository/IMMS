@@ -15,7 +15,7 @@
     "react-router-dom": "^6.28.2",
     "zustand": "^4.5.5",
     "lucide-react": "^0.475.0",
-    "@mech/ui": "*"
+    "@core/ui": "*"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

@@ -1,5 +1,5 @@
 {
-  "name": "@mech/ui",
+  "name": "@core/ui",
   "version": "1.0.0",
   "private": true,
   "type": "module",

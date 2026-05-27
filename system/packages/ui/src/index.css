@@ -176,3 +176,294 @@ body {
   color: var(--color-danger);
   margin-top: 2px;
 }
+
+/* Select Component */
+.mech-select {
+  font-family: var(--font-family);
+  font-size: var(--font-size-sm);
+  background-color: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-md);
+  outline: none;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+  cursor: pointer;
+}
+
+.mech-select:focus {
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 2px rgba(0, 212, 255, 0.2);
+}
+
+.mech-select:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Modal Component */
+.mech-modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn var(--transition-fast) forwards;
+}
+
+.mech-modal-container {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  width: 90%;
+  max-width: 550px;
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  animation: slideUp var(--transition-normal) cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.mech-modal-container-lg {
+  max-width: 800px;
+}
+
+.mech-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-md) var(--space-lg);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.mech-modal-header h3 {
+  margin: 0;
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+}
+
+.mech-modal-close-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: var(--space-xxs);
+  border-radius: var(--radius-sm);
+  transition: color var(--transition-fast), background-color var(--transition-fast);
+  display: flex;
+}
+
+.mech-modal-close-btn:hover {
+  color: var(--text-primary);
+  background-color: var(--bg-tertiary);
+}
+
+.mech-modal-body {
+  padding: var(--space-lg);
+  overflow-y: auto;
+  max-height: 70vh;
+}
+
+.mech-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-sm);
+  padding: var(--space-md) var(--space-lg);
+  border-top: 1px solid var(--border-color);
+  background-color: var(--bg-tertiary);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+/* Tabs Component */
+.mech-tabs {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  width: 100%;
+}
+
+.mech-tabs-list {
+  display: flex;
+  border-bottom: 1px solid var(--border-color);
+  gap: var(--space-sm);
+}
+
+.mech-tab-btn {
+  font-family: var(--font-family);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--text-secondary);
+  background: transparent;
+  border: none;
+  padding: var(--space-xs) var(--space-md);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.mech-tab-btn:hover {
+  color: var(--text-primary);
+}
+
+.mech-tab-btn.active {
+  color: var(--color-primary);
+  border-bottom-color: var(--color-primary);
+}
+
+.mech-tab-panel {
+  outline: none;
+}
+
+/* Badge Component */
+.mech-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 8px;
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  border-radius: var(--radius-pill);
+  line-height: 1;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.mech-badge-primary {
+  background-color: hsl(200, 100%, 10%);
+  color: var(--color-primary);
+  border: 1px solid hsl(200, 100%, 20%);
+}
+
+.mech-badge-success {
+  background-color: hsl(140, 70%, 10%);
+  color: var(--color-success);
+  border: 1px solid hsl(140, 70%, 20%);
+}
+
+.mech-badge-warning {
+  background-color: hsl(35, 90%, 10%);
+  color: var(--color-warning);
+  border: 1px solid hsl(35, 90%, 20%);
+}
+
+.mech-badge-danger {
+  background-color: hsl(355, 80%, 10%);
+  color: var(--color-danger);
+  border: 1px solid hsl(355, 80%, 20%);
+}
+
+.mech-badge-secondary {
+  background-color: var(--bg-tertiary);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
+}
+
+/* Universal Table Component */
+.mech-table-container {
+  width: 100%;
+  overflow-x: auto;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-color);
+  background-color: var(--bg-secondary);
+}
+
+.mech-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: var(--font-size-sm);
+}
+
+.mech-th {
+  background-color: var(--bg-tertiary);
+  color: var(--text-secondary);
+  font-weight: 600;
+  padding: var(--space-sm) var(--space-md);
+  border-bottom: 1px solid var(--border-color);
+  user-select: none;
+}
+
+.mech-th-sortable {
+  cursor: pointer;
+  transition: color var(--transition-fast), background-color var(--transition-fast);
+}
+
+.mech-th-sortable:hover {
+  color: var(--text-primary);
+  background-color: var(--border-color);
+}
+
+.mech-td {
+  padding: var(--space-sm) var(--space-md);
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-primary);
+}
+
+.mech-tr {
+  transition: background-color var(--transition-fast);
+}
+
+.mech-tr:last-child .mech-td {
+  border-bottom: none;
+}
+
+.mech-tr-hoverable:hover {
+  background-color: var(--bg-tertiary);
+}
+
+/* Pulse status circle */
+.mech-pulse {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+  position: relative;
+}
+
+.mech-pulse-green { background-color: var(--color-success); }
+.mech-pulse-green::after {
+  content: '';
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  right: -4px;
+  bottom: -4px;
+  border-radius: 50%;
+  border: 2px solid var(--color-success);
+  opacity: 0;
+  animation: pulse-ring 1.5s cubic-bezier(0.215, 0.610, 0.355, 1) infinite;
+}
+
+.mech-pulse-yellow { background-color: var(--color-warning); }
+.mech-pulse-red { background-color: var(--color-danger); }
+.mech-pulse-red::after {
+  content: '';
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  right: -4px;
+  bottom: -4px;
+  border-radius: 50%;
+  border: 2px solid var(--color-danger);
+  opacity: 0;
+  animation: pulse-ring 1.5s cubic-bezier(0.215, 0.610, 0.355, 1) infinite;
+}
+
+@keyframes pulse-ring {
+  0% { transform: scale(0.5); opacity: 0; }
+  50% { opacity: 0.5; }
+  100% { transform: scale(1.5); opacity: 0; }
+}

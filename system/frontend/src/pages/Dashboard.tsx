@@ -1,7 +1,7 @@
 import React from 'react';
 import { useAuthStore } from '../store/authStore';
 import { useModuleStore } from '../store/moduleStore';
-import { Card, Button } from '@mech/ui';
+import { Card, Button } from '@core/ui';
 import { useNavigate } from 'react-router-dom';
 import * as Icons from 'lucide-react';
 

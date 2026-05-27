@@ -172,3 +172,26 @@ Implement JWT authentication, roles decorator, and RolesGuard.
 ### Notes
 None.
 
+---
+
+## Task ID: task-ui-controls
+Title: Design System Controls Extension
+Status: done
+Priority: high
+Dependencies: [task-backend-auth]
+
+### Description
+Rename package to `@core/ui` and implement remaining core, data, and industrial components inside the package.
+
+### Checklist
+- [x] Rename `@mech/ui` to `@core/ui` across the codebase and re-link workspaces
+- [x] Add new component CSS styles to index.css
+- [x] Create Select and Modal components
+- [x] Create Tabs and Badge components
+- [x] Create Table component (with sorting & column custom rendering)
+- [x] Create Industrial components (EquipmentStatusIndicator, DowntimeBadge, MaintenancePriorityTag)
+- [x] Export all components from index.ts and compile the package successfully
+
+### Notes
+None.
+

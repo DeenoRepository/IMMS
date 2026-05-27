@@ -1,6 +1,6 @@
 import React from 'react';
 import { useAuthStore } from '../store/authStore';
-import { Button } from '@mech/ui';
+import { Button } from '@core/ui';
 import { User as UserIcon, LogOut, Bell } from 'lucide-react';
 
 export const Header: React.FC = () => {

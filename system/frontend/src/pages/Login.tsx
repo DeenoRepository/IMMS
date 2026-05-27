@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore, type UserRole } from '../store/authStore';
-import { Card, Input, Button } from '@mech/ui';
+import { Card, Input, Button } from '@core/ui';
 
 export const Login: React.FC = () => {
   const navigate = useNavigate();
