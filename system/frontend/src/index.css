@@ -1,4 +1,4 @@
-@import "@core/ui/dist/index.css";
+@import "../../packages/ui/dist/index.css";
 
 /* Shell Container Layout */
 .shell-container {

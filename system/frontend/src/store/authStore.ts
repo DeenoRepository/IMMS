@@ -18,11 +18,18 @@ interface AuthState {
 
 export const useAuthStore = create<AuthState>((set) => {
   // Retrieve initial state from localStorage
-  const savedUser = localStorage.getItem('user');
+  let user = null;
+  try {
+    const savedUser = localStorage.getItem('user');
+    user = savedUser ? JSON.parse(savedUser) : null;
+  } catch (e) {
+    console.error('Failed to parse user from localStorage', e);
+    localStorage.removeItem('user');
+  }
   const savedToken = localStorage.getItem('token');
 
   return {
-    user: savedUser ? JSON.parse(savedUser) : null,
+    user,
     token: savedToken || null,
     isAuthenticated: !!savedToken,
     login: (role: UserRole, name = 'Test User') => {
