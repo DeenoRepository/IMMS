@@ -93,6 +93,7 @@ export const EquipmentModal: React.FC<EquipmentModalProps> = ({
   isOnlyStatusAllowed = false,
 }) => {
   const { user } = useAuthStore();
+  const isEditMode = !!initialValues;
   const [activeTab, setActiveTab] = useState('specs');
 
   // Standard template states
@@ -186,6 +187,20 @@ export const EquipmentModal: React.FC<EquipmentModalProps> = ({
   const [previewBlobUrl, setPreviewBlobUrl] = useState<string | null>(null);
   const [previewFileType, setPreviewFileType] = useState<'pdf' | 'image' | 'text' | 'unsupported' | null>(null);
   const [previewTextContent, setPreviewTextContent] = useState<string | null>(null);
+  const [latestRejectedRequest, setLatestRejectedRequest] = useState<any | null>(null);
+
+  const fetchChangeRequests = async () => {
+    if (!initialValues?.id) return;
+    try {
+      const res = await api.get(`/equipment/${initialValues.id}/change-requests`);
+      const rejected = res.data
+        .filter((r: any) => r.status === 'rejected')
+        .sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0];
+      setLatestRejectedRequest(rejected || null);
+    } catch (err) {
+      console.error('Failed to fetch change requests history', err);
+    }
+  };
 
   const isWriteAllowed = user?.role === 'chief_mechanic' || user?.role === 'admin';
 
@@ -229,10 +244,12 @@ export const EquipmentModal: React.FC<EquipmentModalProps> = ({
       fetchCategories();
       const categoryId = initialValues ? (initialValues.categoryId || '') : '';
       fetchRequiredDocsAndMissing(categoryId);
+      fetchChangeRequests();
     } else {
       setRequiredDocsList([]);
       setMissingDocs([]);
       setNewDocType('Other');
+      setLatestRejectedRequest(null);
     }
   }, [isOpen, initialValues]);
 
@@ -610,291 +627,237 @@ export const EquipmentModal: React.FC<EquipmentModalProps> = ({
   // TAB 1: General Specs Component
   const specsContent = (
     <form onSubmit={handleSubmit} style={{ marginTop: 'var(--space-md)' }}>
-      {!isOnlyStatusAllowed ? (
-        <div style={{ 
-          display: 'grid', 
-          gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', 
-          gap: 'var(--space-md)',
-          marginBottom: 'var(--space-md)'
+      {isEditMode && latestRejectedRequest && (
+        <div style={{
+          backgroundColor: 'hsla(360, 92%, 35%, 0.08)',
+          border: '1px solid var(--color-danger)',
+          borderRadius: 'var(--radius-md)',
+          padding: 'var(--space-sm) var(--space-md)',
+          marginBottom: 'var(--space-md)',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '4px',
         }}>
-          <div>
-            <Input
-              label="Equipment Name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-              placeholder="e.g. Lathe 1A"
-            />
-            <Select
-              label="Equipment Category"
-              options={[
-                { value: '', label: 'Select Category (None)' },
-                ...categories.map(c => ({ value: c.id, label: c.name }))
-              ]}
-              value={selectedCategoryId}
-              onChange={(e) => {
-                const newCatId = e.target.value;
-                setSelectedCategoryId(newCatId);
-                setDynamicValues({});
-                fetchRequiredDocsAndMissing(newCatId);
-              }}
-            />
-            {!selectedCategoryId && (
-              <Input
-                label="Type / Class"
-                value={type}
-                onChange={(e) => setType(e.target.value)}
-                required
-                placeholder="e.g. Lathe, Pump, Boiler"
-              />
-            )}
-            <Input
-              label="Location"
-              value={location}
-              onChange={(e) => setLocation(e.target.value)}
-              required
-              placeholder="e.g. Main Hall, Workshop 2"
-            />
-            {isFieldVisible('commissioningDate') && (
-              <Input
-                label={`Commissioning Date${isFieldRequired('commissioningDate') ? ' *' : ''}`}
-                type="date"
-                value={commissioningDate}
-                onChange={(e) => setCommissioningDate(e.target.value)}
-                required={isFieldRequired('commissioningDate')}
-              />
-            )}
-            {isFieldVisible('criticality') && (
-              <Select
-                label={`Criticality Level${isFieldRequired('criticality') ? ' *' : ''}`}
-                options={[
-                  { value: 'low', label: 'Low' },
-                  { value: 'medium', label: 'Medium' },
-                  { value: 'high', label: 'High' },
-                  { value: 'critical', label: 'Critical' },
-                ]}
-                value={criticality}
-                onChange={(e) => setCriticality(e.target.value as any)}
-                required={isFieldRequired('criticality')}
-              />
-            )}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 600, color: 'var(--color-danger)' }}>
+            <span>⚠️ Previous Change Request Rejected</span>
           </div>
-          <div>
-            {isFieldVisible('manufacturer') && (
-              <Input
-                label={`Manufacturer${isFieldRequired('manufacturer') ? ' *' : ''}`}
-                value={manufacturer}
-                onChange={(e) => setManufacturer(e.target.value)}
-                placeholder="e.g. AlphaMach Inc."
-                required={isFieldRequired('manufacturer')}
-              />
-            )}
-            {isFieldVisible('model') && (
-              <Input
-                label={`Model${isFieldRequired('model') ? ' *' : ''}`}
-                value={model}
-                onChange={(e) => setModel(e.target.value)}
-                placeholder="e.g. X-2000"
-                required={isFieldRequired('model')}
-              />
-            )}
-            {isFieldVisible('serialNumber') && (
-              <Input
-                label={`Serial Number${isFieldRequired('serialNumber') ? ' *' : ''}`}
-                value={serialNumber}
-                onChange={(e) => setSerialNumber(e.target.value)}
-                placeholder="e.g. SN-CNC-8821A"
-                required={isFieldRequired('serialNumber')}
-              />
-            )}
-            {isFieldVisible('inventoryNumber') && (
-              <Input
-                label={`Inventory Number${isFieldRequired('inventoryNumber') ? ' *' : ''}`}
-                value={inventoryNumber}
-                onChange={(e) => setInventoryNumber(e.target.value)}
-                placeholder="e.g. INV-2020-0041"
-                required={isFieldRequired('inventoryNumber')}
-              />
-            )}
-            {(isFieldVisible('manufactureYear') || isFieldVisible('powerKw')) && (
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-sm)' }}>
-                {isFieldVisible('manufactureYear') && (
-                  <Input
-                    label={`Manufacture Year${isFieldRequired('manufactureYear') ? ' *' : ''}`}
-                    type="number"
-                    value={manufactureYear}
-                    onChange={(e) => setManufactureYear(e.target.value)}
-                    placeholder="e.g. 2020"
-                    required={isFieldRequired('manufactureYear')}
-                  />
-                )}
-                {isFieldVisible('powerKw') && (
-                  <Input
-                    label={`Power (kW)${isFieldRequired('powerKw') ? ' *' : ''}`}
-                    type="number"
-                    step="0.1"
-                    value={powerKw}
-                    onChange={(e) => setPowerKw(e.target.value)}
-                    placeholder="e.g. 15.5"
-                    required={isFieldRequired('powerKw')}
-                  />
-                )}
-              </div>
-            )}
-          </div>
-
-          {/* Custom Standard Fields Inputs */}
-          {standardTemplate.filter(t => t.isCustom && t.isVisible).length > 0 && (
-            <div style={{ gridColumn: 'span 2', marginTop: 'var(--space-sm)' }}>
-              <h4 style={{ 
-                margin: '0 0 var(--space-xs) 0', 
-                borderBottom: '1px solid var(--border-color)', 
-                paddingBottom: 'var(--space-xxs)',
-                fontSize: 'var(--font-size-md)',
-                color: 'var(--color-primary)'
-              }}>
-                Additional Asset Parameters
-              </h4>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 'var(--space-md)' }}>
-                {standardTemplate.filter(t => t.isCustom && t.isVisible).map(temp => (
-                  <Input
-                    key={temp.fieldName}
-                    label={`${temp.displayName || temp.fieldName}${temp.isRequired ? ' *' : ''}`}
-                    type={temp.type === 'number' ? 'number' : temp.type === 'date' ? 'date' : 'text'}
-                    value={customFields[temp.fieldName] !== undefined && customFields[temp.fieldName] !== null ? String(customFields[temp.fieldName]) : ''}
-                    onChange={(e) => setCustomFields({ ...customFields, [temp.fieldName]: e.target.value })}
-                    placeholder={temp.isRequired ? 'Required parameter' : 'Optional parameter'}
-                    required={temp.isRequired}
-                  />
-                ))}
-              </div>
+          <span style={{ fontSize: 'var(--font-size-sm)', color: 'var(--text-secondary)' }}>
+            Your previous specifications proposal submitted by <strong>{latestRejectedRequest.proposedBy}</strong> was rejected by <strong>{latestRejectedRequest.reviewedBy || 'Manager'}</strong> on {new Date(latestRejectedRequest.reviewedAt).toLocaleDateString()} with reason:
+            <div style={{ marginTop: 'var(--space-xxs)', fontWeight: 600, color: 'var(--text-primary)' }}>
+              &ldquo;{latestRejectedRequest.rejectionReason}&rdquo;
             </div>
-          )}
-
-          {/* Dynamic Attributes Inputs */}
-          {selectedCategoryId && (
-            <div style={{ gridColumn: 'span 2', marginTop: 'var(--space-sm)' }}>
-              <h4 style={{ 
-                margin: '0 0 var(--space-xs) 0', 
-                borderBottom: '1px solid var(--border-color)', 
-                paddingBottom: 'var(--space-xxs)',
-                fontSize: 'var(--font-size-md)',
-                color: 'var(--color-primary)'
-              }}>
-                Category Technical Parameters ({categories.find(c => c.id === selectedCategoryId)?.name})
-              </h4>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 'var(--space-md)' }}>
-                {categories.find(c => c.id === selectedCategoryId)?.attributes.map(attr => (
-                  <Input
-                    key={attr.id}
-                    label={`${attr.name}${attr.isRequired ? ' *' : ''}`}
-                    type={attr.type === 'number' ? 'number' : 'text'}
-                    value={dynamicValues[attr.id] || ''}
-                    onChange={(e) => setDynamicValues({ ...dynamicValues, [attr.id]: e.target.value })}
-                    placeholder={attr.isRequired ? 'Required parameter' : 'Optional parameter'}
-                    required={attr.isRequired}
-                  />
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-      ) : (
-        <div style={{ 
-          display: 'grid', 
-          gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', 
-          gap: 'var(--space-md)', 
-          marginBottom: 'var(--space-md)' 
-        }}>
-          <div>
-            <p style={{ margin: 'var(--space-xxs) 0' }}><strong>Equipment:</strong> {name}</p>
-            <p style={{ margin: 'var(--space-xxs) 0' }}><strong>Type:</strong> {type}</p>
-            <p style={{ margin: 'var(--space-xxs) 0' }}><strong>Location:</strong> {location}</p>
-            {isFieldVisible('commissioningDate') && (
-              <p style={{ margin: 'var(--space-xxs) 0' }}><strong>Commissioning Date:</strong> {commissioningDate}</p>
-            )}
-            {isFieldVisible('criticality') && (
-              <p style={{ margin: 'var(--space-xxs) 0' }}><strong>Criticality:</strong> <span style={{ textTransform: 'capitalize' }}>{criticality}</span></p>
-            )}
-          </div>
-          <div>
-            {isFieldVisible('manufacturer') && (
-              <p style={{ margin: 'var(--space-xxs) 0' }}><strong>Manufacturer:</strong> {manufacturer || 'N/A'}</p>
-            )}
-            {isFieldVisible('model') && (
-              <p style={{ margin: 'var(--space-xxs) 0' }}><strong>Model:</strong> {model || 'N/A'}</p>
-            )}
-            {isFieldVisible('serialNumber') && (
-              <p style={{ margin: 'var(--space-xxs) 0' }}><strong>Serial Number:</strong> {serialNumber || 'N/A'}</p>
-            )}
-            {isFieldVisible('inventoryNumber') && (
-              <p style={{ margin: 'var(--space-xxs) 0' }}><strong>Inventory Number:</strong> {inventoryNumber || 'N/A'}</p>
-            )}
-            {(isFieldVisible('manufactureYear') || isFieldVisible('powerKw')) && (
-              <p style={{ margin: 'var(--space-xxs) 0' }}>
-                <strong>Mfg Year / Power:</strong> {isFieldVisible('manufactureYear') ? (manufactureYear || 'N/A') : 'N/A'} / {isFieldVisible('powerKw') ? (powerKw ? `${powerKw} kW` : 'N/A') : 'N/A'}
-              </p>
-            )}
-          </div>
-
-          {/* Custom Standard Fields Read-Only Display */}
-          {standardTemplate.filter(t => t.isCustom && t.isVisible).length > 0 && (
-            <div style={{ gridColumn: 'span 2', marginTop: 'var(--space-sm)' }}>
-              <h4 style={{ 
-                margin: '0 0 var(--space-xs) 0', 
-                borderBottom: '1px solid var(--border-color)', 
-                paddingBottom: 'var(--space-xxs)',
-                fontSize: 'var(--font-size-md)',
-                color: 'var(--text-secondary)'
-              }}>
-                Additional Asset Parameters
-              </h4>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-                {standardTemplate.filter(t => t.isCustom && t.isVisible).map(temp => {
-                  const val = customFields[temp.fieldName];
-                  let displayVal = 'N/A';
-                  if (val !== undefined && val !== null && String(val).trim() !== '') {
-                    displayVal = temp.type === 'date' ? new Date(val).toLocaleDateString() : String(val);
-                  }
-                  return (
-                    <p key={temp.fieldName} style={{ margin: 'var(--space-xxs) 0' }}>
-                      <strong>{temp.displayName || temp.fieldName}:</strong> {displayVal}
-                    </p>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-
-          {/* Dynamic Attributes Read-Only Display */}
-          {selectedCategoryId && (
-            <div style={{ gridColumn: 'span 2', marginTop: 'var(--space-sm)' }}>
-              <h4 style={{ 
-                margin: '0 0 var(--space-xs) 0', 
-                borderBottom: '1px solid var(--border-color)', 
-                paddingBottom: 'var(--space-xxs)',
-                fontSize: 'var(--font-size-md)',
-                color: 'var(--text-secondary)'
-              }}>
-                Category Technical Parameters ({categories.find(c => c.id === selectedCategoryId)?.name})
-              </h4>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-                {categories.find(c => c.id === selectedCategoryId)?.attributes.map(attr => (
-                  <p key={attr.id} style={{ margin: 'var(--space-xxs) 0' }}>
-                    <strong>{attr.name}:</strong> {dynamicValues[attr.id] || 'N/A'}
-                  </p>
-                ))}
-              </div>
-            </div>
-          )}
-          
-          <div style={{ gridColumn: 'span 2', marginTop: 'var(--space-xs)' }}>
-            <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--font-size-xs)', margin: 0 }}>
-              * Under your role (Mechanic), you are only authorized to change the operational status.
-            </p>
-          </div>
+          </span>
         </div>
       )}
+
+      {isEditMode && isOnlyStatusAllowed && (
+        <div style={{
+          backgroundColor: 'rgba(59, 130, 246, 0.08)',
+          border: '1px solid var(--color-primary)',
+          borderRadius: 'var(--radius-md)',
+          padding: 'var(--space-sm) var(--space-md)',
+          marginBottom: 'var(--space-md)',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '4px',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 600, color: 'var(--color-primary)' }}>
+            <span>ℹ️ Specifications Edit Mode (Mechanic Workflow)</span>
+          </div>
+          <span style={{ fontSize: 'var(--font-size-sm)', color: 'var(--text-secondary)' }}>
+            You are proposing modifications to this asset's specifications. Your changes will be saved as a pending request and must be approved by a chief mechanic or administrator before they take effect.
+          </span>
+        </div>
+      )}
+
+      <div style={{ 
+        display: 'grid', 
+        gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', 
+        gap: 'var(--space-md)',
+        marginBottom: 'var(--space-md)'
+      }}>
+        <div>
+          <Input
+            label="Equipment Name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
+            placeholder="e.g. Lathe 1A"
+          />
+          <Select
+            label="Equipment Category"
+            options={[
+              { value: '', label: 'Select Category (None)' },
+              ...categories.map(c => ({ value: c.id, label: c.name }))
+            ]}
+            value={selectedCategoryId}
+            onChange={(e) => {
+              const newCatId = e.target.value;
+              setSelectedCategoryId(newCatId);
+              setDynamicValues({});
+              fetchRequiredDocsAndMissing(newCatId);
+            }}
+          />
+          {!selectedCategoryId && (
+            <Input
+              label="Type / Class"
+              value={type}
+              onChange={(e) => setType(e.target.value)}
+              required
+              placeholder="e.g. Lathe, Pump, Boiler"
+            />
+          )}
+          <Input
+            label="Location"
+            value={location}
+            onChange={(e) => setLocation(e.target.value)}
+            required
+            placeholder="e.g. Main Hall, Workshop 2"
+          />
+          {isFieldVisible('commissioningDate') && (
+            <Input
+              label={`Commissioning Date${isFieldRequired('commissioningDate') ? ' *' : ''}`}
+              type="date"
+              value={commissioningDate}
+              onChange={(e) => setCommissioningDate(e.target.value)}
+              required={isFieldRequired('commissioningDate')}
+            />
+          )}
+          {isFieldVisible('criticality') && (
+            <Select
+              label={`Criticality Level${isFieldRequired('criticality') ? ' *' : ''}`}
+              options={[
+                { value: 'low', label: 'Low' },
+                { value: 'medium', label: 'Medium' },
+                { value: 'high', label: 'High' },
+                { value: 'critical', label: 'Critical' },
+              ]}
+              value={criticality}
+              onChange={(e) => setCriticality(e.target.value as any)}
+              required={isFieldRequired('criticality')}
+            />
+          )}
+        </div>
+        <div>
+          {isFieldVisible('manufacturer') && (
+            <Input
+              label={`Manufacturer${isFieldRequired('manufacturer') ? ' *' : ''}`}
+              value={manufacturer}
+              onChange={(e) => setManufacturer(e.target.value)}
+              placeholder="e.g. AlphaMach Inc."
+              required={isFieldRequired('manufacturer')}
+            />
+          )}
+          {isFieldVisible('model') && (
+            <Input
+              label={`Model${isFieldRequired('model') ? ' *' : ''}`}
+              value={model}
+              onChange={(e) => setModel(e.target.value)}
+              placeholder="e.g. X-2000"
+              required={isFieldRequired('model')}
+            />
+          )}
+          {isFieldVisible('serialNumber') && (
+            <Input
+              label={`Serial Number${isFieldRequired('serialNumber') ? ' *' : ''}`}
+              value={serialNumber}
+              onChange={(e) => setSerialNumber(e.target.value)}
+              placeholder="e.g. SN-CNC-8821A"
+              required={isFieldRequired('serialNumber')}
+            />
+          )}
+          {isFieldVisible('inventoryNumber') && (
+            <Input
+              label={`Inventory Number${isFieldRequired('inventoryNumber') ? ' *' : ''}`}
+              value={inventoryNumber}
+              onChange={(e) => setInventoryNumber(e.target.value)}
+              placeholder="e.g. INV-2020-0041"
+              required={isFieldRequired('inventoryNumber')}
+            />
+          )}
+          {(isFieldVisible('manufactureYear') || isFieldVisible('powerKw')) && (
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-sm)' }}>
+              {isFieldVisible('manufactureYear') && (
+                <Input
+                  label={`Manufacture Year${isFieldRequired('manufactureYear') ? ' *' : ''}`}
+                  type="number"
+                  value={manufactureYear}
+                  onChange={(e) => setManufactureYear(e.target.value)}
+                  placeholder="e.g. 2020"
+                  required={isFieldRequired('manufactureYear')}
+                />
+              )}
+              {isFieldVisible('powerKw') && (
+                <Input
+                  label={`Power (kW)${isFieldRequired('powerKw') ? ' *' : ''}`}
+                  type="number"
+                  step="0.1"
+                  value={powerKw}
+                  onChange={(e) => setPowerKw(e.target.value)}
+                  placeholder="e.g. 15.5"
+                  required={isFieldRequired('powerKw')}
+                />
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Custom Standard Fields Inputs */}
+        {standardTemplate.filter(t => t.isCustom && t.isVisible).length > 0 && (
+          <div style={{ gridColumn: 'span 2', marginTop: 'var(--space-sm)' }}>
+            <h4 style={{ 
+              margin: '0 0 var(--space-xs) 0', 
+              borderBottom: '1px solid var(--border-color)', 
+              paddingBottom: 'var(--space-xxs)',
+              fontSize: 'var(--font-size-md)',
+              color: 'var(--color-primary)'
+            }}>
+              Additional Asset Parameters
+            </h4>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 'var(--space-md)' }}>
+              {standardTemplate.filter(t => t.isCustom && t.isVisible).map(temp => (
+                <Input
+                  key={temp.fieldName}
+                  label={`${temp.displayName || temp.fieldName}${temp.isRequired ? ' *' : ''}`}
+                  type={temp.type === 'number' ? 'number' : temp.type === 'date' ? 'date' : 'text'}
+                  value={customFields[temp.fieldName] !== undefined && customFields[temp.fieldName] !== null ? String(customFields[temp.fieldName]) : ''}
+                  onChange={(e) => setCustomFields({ ...customFields, [temp.fieldName]: e.target.value })}
+                  placeholder={temp.isRequired ? 'Required parameter' : 'Optional parameter'}
+                  required={temp.isRequired}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Dynamic Attributes Inputs */}
+        {selectedCategoryId && (
+          <div style={{ gridColumn: 'span 2', marginTop: 'var(--space-sm)' }}>
+            <h4 style={{ 
+              margin: '0 0 var(--space-xs) 0', 
+              borderBottom: '1px solid var(--border-color)', 
+              paddingBottom: 'var(--space-xxs)',
+              fontSize: 'var(--font-size-md)',
+              color: 'var(--color-primary)'
+            }}>
+              Category Technical Parameters ({categories.find(c => c.id === selectedCategoryId)?.name})
+            </h4>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 'var(--space-md)' }}>
+              {categories.find(c => c.id === selectedCategoryId)?.attributes.map(attr => (
+                <Input
+                  key={attr.id}
+                  label={`${attr.name}${attr.isRequired ? ' *' : ''}`}
+                  type={attr.type === 'number' ? 'number' : 'text'}
+                  value={dynamicValues[attr.id] || ''}
+                  onChange={(e) => setDynamicValues({ ...dynamicValues, [attr.id]: e.target.value })}
+                  placeholder={attr.isRequired ? 'Required parameter' : 'Optional parameter'}
+                  required={attr.isRequired}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
 
       <Select
         label="Operational Status"
@@ -1278,7 +1241,6 @@ export const EquipmentModal: React.FC<EquipmentModalProps> = ({
   ];
 
   // Render specifications form if we are in creation mode (no tabs needed yet)
-  const isEditMode = !!initialValues;
 
   const modalFooter = !isEditMode || activeTab === 'specs' ? (
     <div style={{ display: 'flex', gap: '10px' }}>
@@ -1286,7 +1248,7 @@ export const EquipmentModal: React.FC<EquipmentModalProps> = ({
         Cancel
       </Button>
       <Button variant="primary" onClick={handleSubmit} glow>
-        Save Changes
+        {isOnlyStatusAllowed && isEditMode ? 'Propose Specs Change' : 'Save Changes'}
       </Button>
     </div>
   ) : (

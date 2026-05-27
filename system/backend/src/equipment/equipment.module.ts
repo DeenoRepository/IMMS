@@ -10,6 +10,7 @@ import { EquipmentAttributeValue } from './entities/equipment-attribute-value.en
 import { EquipmentStandardTemplate } from './entities/equipment-standard-template.entity';
 import { EquipmentRequiredDocument } from './entities/equipment-required-document.entity';
 import { EquipmentUploadSetting } from './entities/equipment-upload-setting.entity';
+import { EquipmentChangeRequest } from './entities/equipment-change-request.entity';
 import { EquipmentService } from './equipment.service';
 import { EquipmentController } from './equipment.controller';
 
@@ -26,6 +27,7 @@ import { EquipmentController } from './equipment.controller';
       EquipmentStandardTemplate,
       EquipmentRequiredDocument,
       EquipmentUploadSetting,
+      EquipmentChangeRequest,
     ]),
   ],
   controllers: [EquipmentController],

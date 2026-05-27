@@ -22,6 +22,7 @@
 - High-Fidelity Modal Windows UI/UX Redesign (translucent dark overlays, deep backdrop blurs, organic spring-like scale transitions, perfect circular SVG close buttons, and seamless footers) fully implemented.
 - Alignment and Spacing Polish (perfect 10px/14px padding bounds on forms and controls, consistent margin variables, capsule badges, layout wrapperStyle overrides, and complete design system build consistency) fully implemented.
 - Professional Advanced Filters (collapsible three-column grid panel for deep filtering by category, criticality, location, and manufacturer, unified reset filters triggers, search icons, clear handlers, and active filters counts) fully implemented.
+- Equipment Specifications Change Approval Workflow (allowing mechanics to propose specification alterations, which admins/chief mechanics review side-by-side via a Comparative Diff View with rejection comments feedback loop) fully implemented.
 
 
 ## Completed Tasks
@@ -56,5 +57,7 @@
 - `task-ui-modal-redesign`: High-Fidelity Modal Windows UI/UX Redesign
 - `task-ui-spacings-polish`: Alignment and Spacing Polish for Blocks and Controls
 - `task-ui-equipment-advanced-filters`: Professional and Convenient Advanced Filters on Equipment Registry
+- `task-backend-change-approval`: Equipment Specification Change Approval System Backend
+- `task-frontend-change-approval`: Equipment Specification Change Approval System Frontend UI
 
 

@@ -593,6 +593,46 @@ Implement a highly professional, interactive, and convenient filtering panel for
 - [x] Implement a unified "Reset Filters" action button to restore defaults
 - [x] Verify full monorepo production compilation and test functionality
 
+---
+
+## Task ID: task-backend-change-approval
+Title: Equipment Specification Change Approval System Backend
+Status: done
+Priority: high
+Dependencies: [task-ui-equipment-advanced-filters]
+
+### Description
+Implement the database schemas, services, DTOs, and REST API controller endpoints on the backend to handle a professional Equipment Change Approval Workflow. Allow mechanics to propose specification edits and enable chief mechanics/admins to review, approve, or reject these proposals, applying modifications reactively.
+
+### Checklist
+- [x] Create EquipmentChangeRequest TypeORM database entity schema
+- [x] Implement validation DTOs (ProposeChangeDto, ReviewChangeDto)
+- [x] Register entity and update backend EquipmentModule imports
+- [x] Implement service methods (createChangeRequest, getPendingChangeRequests, approveChangeRequest, rejectChangeRequest) in EquipmentService
+- [x] Expose secured REST endpoints with JwtAuthGuard and RolesGuard checks in EquipmentController
+- [x] Verify backend compilation and TypeORM migration status
+
+---
+
+## Task ID: task-frontend-change-approval
+Title: Equipment Specification Change Approval System Frontend UI
+Status: done
+Priority: high
+Dependencies: [task-backend-change-approval]
+
+### Description
+Build the Change Request management dashboard and specifications proposal forms on the frontend. Unlock specs editing inside EquipmentModal for the mechanic role, prompting them to submit change proposals. Build an interactive Manager panel for chief mechanics and admins to review diff logs and trigger approvals.
+
+### Checklist
+- [x] Implement client API handlers for change requests endpoints in api.ts
+- [x] Refactor EquipmentModal.tsx specs form inputs to be editable for the mechanic role
+- [x] Update form submit trigger in EquipmentModal to propose a change request if active role is mechanic
+- [x] Add "Change Requests" management button and modal tab inside Category & Template Manager settings
+- [x] Render interactive specifications Diff View comparing current values with proposed changes
+- [x] Implement Approve and Reject triggers with review feedbacks inside the manager dashboard
+- [x] Verify full monorepo production compilation and verify end-to-end functionality
+
+
 
 
 

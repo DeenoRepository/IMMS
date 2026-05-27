@@ -11,9 +11,12 @@ import { EquipmentAttributeValue } from './entities/equipment-attribute-value.en
 import { EquipmentStandardTemplate } from './entities/equipment-standard-template.entity';
 import { EquipmentRequiredDocument } from './entities/equipment-required-document.entity';
 import { EquipmentUploadSetting } from './entities/equipment-upload-setting.entity';
+import { EquipmentChangeRequest } from './entities/equipment-change-request.entity';
 import { CreateEquipmentDto } from './dto/create-equipment.dto';
 import { UpdateEquipmentDto } from './dto/update-equipment.dto';
 import { CreateCategoryDto } from './dto/create-category.dto';
+import { ProposeChangeDto } from './dto/propose-change.dto';
+import { ReviewChangeDto } from './dto/review-change.dto';
 import * as fs from 'fs';
 
 @Injectable()
@@ -39,6 +42,8 @@ export class EquipmentService {
     private requiredDocumentRepository: Repository<EquipmentRequiredDocument>,
     @InjectRepository(EquipmentUploadSetting)
     private uploadSettingRepository: Repository<EquipmentUploadSetting>,
+    @InjectRepository(EquipmentChangeRequest)
+    private changeRequestRepository: Repository<EquipmentChangeRequest>,
   ) {
     // Ensure uploads directory exists
     this.ensureUploadsDir();
@@ -954,4 +959,181 @@ export class EquipmentService {
     settings.maxFileSizeMb = Number(dto.maxFileSizeMb) || 10;
     return this.uploadSettingRepository.save(settings);
   }
+
+  async createChangeRequest(
+    equipmentId: string,
+    dto: ProposeChangeDto,
+    username: string,
+  ): Promise<EquipmentChangeRequest> {
+    const equipment = await this.equipmentRepository.findOne({ where: { id: equipmentId } });
+    if (!equipment) {
+      throw new NotFoundException(`Equipment with ID ${equipmentId} not found`);
+    }
+
+    await this.validateStandardTemplateRules(dto.proposedChanges);
+
+    const request = this.changeRequestRepository.create({
+      equipmentId,
+      proposedChanges: dto.proposedChanges,
+      status: 'pending',
+      proposedBy: username,
+    });
+
+    return this.changeRequestRepository.save(request);
+  }
+
+  async getPendingChangeRequests(): Promise<EquipmentChangeRequest[]> {
+    return this.changeRequestRepository.find({
+      where: { status: 'pending' },
+      relations: ['equipment'],
+      order: { createdAt: 'DESC' },
+    });
+  }
+
+  async getEquipmentChangeRequests(equipmentId: string): Promise<EquipmentChangeRequest[]> {
+    return this.changeRequestRepository.find({
+      where: { equipmentId },
+      order: { createdAt: 'DESC' },
+    });
+  }
+
+  async approveChangeRequest(
+    requestId: string,
+    reviewerName: string,
+  ): Promise<EquipmentChangeRequest> {
+    const request = await this.changeRequestRepository.findOne({
+      where: { id: requestId },
+      relations: ['equipment', 'equipment.attributeValues'],
+    });
+
+    if (!request) {
+      throw new NotFoundException(`Change request with ID ${requestId} not found`);
+    }
+
+    if (request.status !== 'pending') {
+      throw new BadRequestException(`Change request is already ${request.status}`);
+    }
+
+    const equipment = request.equipment;
+    if (!equipment) {
+      throw new NotFoundException(`Linked equipment not found`);
+    }
+
+    const oldEquipment = { 
+      ...equipment,
+      attributeValues: equipment.attributeValues ? [...equipment.attributeValues] : []
+    };
+
+    const proposed = request.proposedChanges;
+    const standardFields = [
+      'name', 'type', 'location', 'serialNumber', 'manufacturer', 
+      'model', 'manufactureYear', 'inventoryNumber', 'criticality', 'powerKw', 'categoryId'
+    ];
+
+    for (const key of standardFields) {
+      if (proposed[key] !== undefined) {
+        (equipment as any)[key] = proposed[key];
+      }
+    }
+
+    if (proposed.customFields !== undefined) {
+      equipment.customFields = {
+        ...(equipment.customFields || {}),
+        ...proposed.customFields
+      };
+    }
+
+    const savedEquipment = await this.equipmentRepository.save(equipment);
+
+    if (proposed.attributeValues !== undefined && Array.isArray(proposed.attributeValues)) {
+      await this.attributeValueRepository.delete({ equipmentId: equipment.id });
+
+      const newValues = proposed.attributeValues.map((av: any) =>
+        this.attributeValueRepository.create({
+          equipmentId: equipment.id,
+          attributeId: av.attributeId,
+          value: av.value,
+        })
+      );
+      await this.attributeValueRepository.save(newValues);
+    }
+
+    const changes: string[] = [];
+    for (const key of standardFields) {
+      const oldVal = (oldEquipment as any)[key];
+      const newVal = (savedEquipment as any)[key];
+      if (oldVal !== newVal) {
+        changes.push(`Field "${key}" changed: "${oldVal || 'N/A'}" -> "${newVal || 'N/A'}"`);
+      }
+    }
+    
+    if (proposed.customFields !== undefined) {
+      const oldCustom = oldEquipment.customFields || {};
+      const newCustom = savedEquipment.customFields || {};
+      for (const [k, v] of Object.entries(newCustom)) {
+        if (oldCustom[k] !== v) {
+          changes.push(`Parameter "${k}" changed: "${oldCustom[k] || 'N/A'}" -> "${v || 'N/A'}"`);
+        }
+      }
+    }
+
+    if (proposed.attributeValues !== undefined && Array.isArray(proposed.attributeValues)) {
+      const category = equipment.categoryId
+        ? await this.categoryRepository.findOne({
+            where: { id: equipment.categoryId },
+            relations: ['attributes']
+          })
+        : null;
+
+      for (const av of proposed.attributeValues) {
+        const oldVal = oldEquipment.attributeValues?.find(o => o.attributeId === av.attributeId)?.value || 'N/A';
+        const attrName = category?.attributes.find(a => a.id === av.attributeId)?.name || av.attributeId;
+        if (oldVal !== av.value) {
+          changes.push(`Category Parameter "${attrName}" changed: "${oldVal}" -> "${av.value}"`);
+        }
+      }
+    }
+
+    const details = changes.length > 0 
+      ? `Specifications approved and applied:\n${changes.join('\n')}`
+      : 'Specifications approved (no distinct modifications found).';
+
+    const log = this.changeLogRepository.create({
+      equipmentId: equipment.id,
+      action: 'update_specs',
+      changedBy: `${request.proposedBy} (approved by ${reviewerName})`,
+      changeDetails: details,
+    });
+    await this.changeLogRepository.save(log);
+
+    request.status = 'approved';
+    request.reviewedBy = reviewerName;
+    request.reviewedAt = new Date();
+
+    return this.changeRequestRepository.save(request);
+  }
+
+  async rejectChangeRequest(
+    requestId: string,
+    dto: ReviewChangeDto,
+    reviewerName: string,
+  ): Promise<EquipmentChangeRequest> {
+    const request = await this.changeRequestRepository.findOne({ where: { id: requestId } });
+
+    if (!request) {
+      throw new NotFoundException(`Change request with ID ${requestId} not found`);
+    }
+
+    if (request.status !== 'pending') {
+      throw new BadRequestException(`Change request is already ${request.status}`);
+    }
+
+    request.status = 'rejected';
+    request.reviewedBy = reviewerName;
+    request.rejectionReason = dto.rejectionReason || 'No feedback provided';
+    request.reviewedAt = new Date();
+
+    return this.changeRequestRepository.save(request);
+  }
 }
+

@@ -3,6 +3,8 @@ import { EquipmentService } from './equipment.service';
 import { CreateEquipmentDto } from './dto/create-equipment.dto';
 import { UpdateEquipmentDto } from './dto/update-equipment.dto';
 import { CreateCategoryDto } from './dto/create-category.dto';
+import { ProposeChangeDto } from './dto/propose-change.dto';
+import { ReviewChangeDto } from './dto/review-change.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -112,6 +114,52 @@ export class EquipmentController {
   @Roles('chief_mechanic', 'admin')
   async updateUploadSettings(@Body() dto: { allowedExtensions: string; maxFileSizeMb: number }) {
     return this.equipmentService.updateUploadSettings(dto);
+  }
+
+  @Get('change-requests/pending')
+  @UseGuards(RolesGuard)
+  @Roles('chief_mechanic', 'admin')
+  async getPendingChangeRequests() {
+    return this.equipmentService.getPendingChangeRequests();
+  }
+
+  @Post('change-requests/:id/approve')
+  @UseGuards(RolesGuard)
+  @Roles('chief_mechanic', 'admin')
+  async approveChangeRequest(@Param('id') id: string, @Request() req: any) {
+    const reviewerName = req.user?.username || 'System';
+    return this.equipmentService.approveChangeRequest(id, reviewerName);
+  }
+
+  @Post('change-requests/:id/reject')
+  @UseGuards(RolesGuard)
+  @Roles('chief_mechanic', 'admin')
+  async rejectChangeRequest(
+    @Param('id') id: string,
+    @Body() dto: ReviewChangeDto,
+    @Request() req: any,
+  ) {
+    const reviewerName = req.user?.username || 'System';
+    return this.equipmentService.rejectChangeRequest(id, dto, reviewerName);
+  }
+
+  @Post(':id/change-requests')
+  @UseGuards(RolesGuard)
+  @Roles('mechanic', 'chief_mechanic', 'admin')
+  async createChangeRequest(
+    @Param('id') id: string,
+    @Body() dto: ProposeChangeDto,
+    @Request() req: any,
+  ) {
+    const username = req.user?.username || 'System';
+    return this.equipmentService.createChangeRequest(id, dto, username);
+  }
+
+  @Get(':id/change-requests')
+  @UseGuards(RolesGuard)
+  @Roles('mechanic', 'chief_mechanic', 'admin')
+  async getEquipmentChangeRequests(@Param('id') id: string) {
+    return this.equipmentService.getEquipmentChangeRequests(id);
   }
 
   @Get(':id/missing-documents')

@@ -111,6 +111,12 @@ export const Equipment: React.FC = () => {
   const [allowedExtensions, setAllowedExtensions] = useState('');
   const [maxFileSizeMb, setMaxFileSizeMb] = useState(10);
 
+  // Specifications Change Requests Workflow states
+  const [pendingRequests, setPendingRequests] = useState<any[]>([]);
+  const [loadingRequests, setLoadingRequests] = useState(false);
+  const [selectedRequest, setSelectedRequest] = useState<any | null>(null);
+  const [rejectionReason, setRejectionReason] = useState('');
+
   const fieldLabelMap: Record<string, string> = {
     serialNumber: 'Serial Number',
     manufacturer: 'Manufacturer',
@@ -231,6 +237,274 @@ export const Equipment: React.FC = () => {
     }
   };
 
+  const fetchPendingRequests = async () => {
+    setLoadingRequests(true);
+    try {
+      const res = await api.get('/equipment/change-requests/pending');
+      setPendingRequests(res.data);
+    } catch (err) {
+      console.error('Failed to load pending change requests', err);
+    } finally {
+      setLoadingRequests(false);
+    }
+  };
+
+  const handleApproveRequest = async (requestId: string) => {
+    if (!window.confirm('Are you sure you want to approve this specification change request? These parameters will be immediately applied to the machinery asset.')) return;
+    try {
+      await api.post(`/equipment/change-requests/${requestId}/approve`);
+      alert('Specification change request approved and successfully applied.');
+      setSelectedRequest(null);
+      fetchPendingRequests();
+      fetchData();
+    } catch (err: any) {
+      alert(err.response?.data?.message || 'Failed to approve request.');
+    }
+  };
+
+  const handleRejectRequest = async (requestId: string) => {
+    if (!rejectionReason.trim()) {
+      alert('Please provide a rejection feedback reason for the mechanic.');
+      return;
+    }
+    if (!window.confirm('Are you sure you want to reject this change proposal?')) return;
+    try {
+      await api.post(`/equipment/change-requests/${requestId}/reject`, {
+        rejectionReason: rejectionReason.trim()
+      });
+      alert('Specification change request rejected.');
+      setSelectedRequest(null);
+      setRejectionReason('');
+      fetchPendingRequests();
+    } catch (err: any) {
+      alert(err.response?.data?.message || 'Failed to reject request.');
+    }
+  };
+
+  useEffect(() => {
+    if (isCategoryModalOpen) {
+      fetchPendingRequests();
+    } else {
+      setSelectedRequest(null);
+      setRejectionReason('');
+    }
+  }, [isCategoryModalOpen]);
+
+  const renderSpecsDiff = (req: any) => {
+    const equipment = req.equipment || {};
+    const proposed = req.proposedChanges || {};
+    
+    const standardFields = [
+      { key: 'name', label: 'Equipment Name' },
+      { key: 'type', label: 'Type / Class' },
+      { key: 'location', label: 'Location' },
+      { key: 'serialNumber', label: 'Serial Number' },
+      { key: 'manufacturer', label: 'Manufacturer' },
+      { key: 'model', label: 'Model' },
+      { key: 'manufactureYear', label: 'Manufacture Year' },
+      { key: 'inventoryNumber', label: 'Inventory Number' },
+      { key: 'criticality', label: 'Criticality Level' },
+      { key: 'powerKw', label: 'Power (kW)' },
+    ];
+
+    const diffs: Array<{ label: string; oldVal: string; newVal: string; isChanged: boolean }> = [];
+
+    for (const f of standardFields) {
+      const oldVal = String(equipment[f.key] !== undefined && equipment[f.key] !== null ? equipment[f.key] : '');
+      const newVal = String(proposed[f.key] !== undefined && proposed[f.key] !== null ? proposed[f.key] : '');
+      const isChanged = oldVal !== newVal;
+      
+      if (proposed[f.key] !== undefined) {
+        diffs.push({
+          label: f.label,
+          oldVal: oldVal || 'N/A',
+          newVal: newVal || 'N/A',
+          isChanged
+        });
+      }
+    }
+
+    if (proposed.commissioningDate !== undefined) {
+      const oldD = equipment.commissioningDate ? new Date(equipment.commissioningDate).toLocaleDateString() : '';
+      const newD = proposed.commissioningDate ? new Date(proposed.commissioningDate).toLocaleDateString() : '';
+      diffs.push({
+        label: 'Commissioning Date',
+        oldVal: oldD || 'N/A',
+        newVal: newD || 'N/A',
+        isChanged: oldD !== newD
+      });
+    }
+
+    const oldCustom = equipment.customFields || {};
+    const newCustom = proposed.customFields || {};
+    const customKeys = Array.from(new Set([...Object.keys(oldCustom), ...Object.keys(newCustom)]));
+    
+    for (const key of customKeys) {
+      const label = standardTemplate.find(t => t.fieldName === key)?.displayName || key;
+      const oldVal = String(oldCustom[key] !== undefined && oldCustom[key] !== null ? oldCustom[key] : '');
+      const newVal = String(newCustom[key] !== undefined && newCustom[key] !== null ? newCustom[key] : '');
+      
+      if (newCustom[key] !== undefined || oldCustom[key] !== undefined) {
+        diffs.push({
+          label: `Parameter: ${label}`,
+          oldVal: oldVal || 'N/A',
+          newVal: newVal || 'N/A',
+          isChanged: oldVal !== newVal
+        });
+      }
+    }
+
+    const oldAttrs = equipment.attributeValues || [];
+    const newAttrs = proposed.attributeValues || [];
+    const allAttrIds = Array.from(new Set([...oldAttrs.map((o: any) => o.attributeId), ...newAttrs.map((n: any) => n.attributeId)]));
+    const category = categories.find(c => c.id === (proposed.categoryId || equipment.categoryId));
+    
+    for (const attrId of allAttrIds) {
+      const attrName = category?.attributes.find(a => a.id === attrId)?.name || attrId;
+      const oldVal = oldAttrs.find((o: any) => o.attributeId === attrId)?.value || '';
+      const newVal = newAttrs.find((n: any) => n.attributeId === attrId)?.value || '';
+      
+      if (newVal || oldVal) {
+        diffs.push({
+          label: `Category Parameter: ${attrName}`,
+          oldVal: oldVal || 'N/A',
+          newVal: newVal || 'N/A',
+          isChanged: oldVal !== newVal
+        });
+      }
+    }
+
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 'var(--font-size-sm)' }}>
+          <thead>
+            <tr style={{ borderBottom: '2px solid var(--border-color)', textAlign: 'left' }}>
+              <th style={{ padding: '8px', fontWeight: 600, color: 'var(--text-secondary)' }}>Specification Parameter</th>
+              <th style={{ padding: '8px', fontWeight: 600, color: 'var(--text-secondary)' }}>Current Value</th>
+              <th style={{ padding: '8px', fontWeight: 600, color: 'var(--text-secondary)' }}>Proposed Value</th>
+            </tr>
+          </thead>
+          <tbody>
+            {diffs.map((d, i) => (
+              <tr 
+                key={i} 
+                style={{ 
+                  borderBottom: '1px solid var(--border-color)',
+                  backgroundColor: d.isChanged ? 'rgba(59, 130, 246, 0.04)' : 'transparent',
+                  fontWeight: d.isChanged ? 600 : 'normal'
+                }}
+              >
+                <td style={{ padding: '8px', color: 'var(--text-primary)' }}>{d.label}</td>
+                <td style={{ padding: '8px', color: d.isChanged ? 'var(--text-muted)' : 'var(--text-primary)', textDecoration: d.isChanged ? 'line-through' : 'none' }}>
+                  {d.oldVal}
+                </td>
+                <td style={{ padding: '8px', color: d.isChanged ? 'var(--color-primary)' : 'var(--text-primary)' }}>
+                  {d.isChanged ? `→ ${d.newVal}` : d.newVal}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    );
+  };
+
+  const changeRequestsContent = (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-md)', marginTop: 'var(--space-md)' }}>
+      {selectedRequest ? (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-md)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-color)', paddingBottom: '8px' }}>
+            <div>
+              <h3 style={{ margin: 0, fontSize: 'var(--font-size-md)' }}>
+                Review Change Request for &ldquo;{selectedRequest.equipment?.name}&rdquo;
+              </h3>
+              <p style={{ margin: '4px 0 0 0', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)' }}>
+                Proposed by <strong>{selectedRequest.proposedBy}</strong> on {new Date(selectedRequest.createdAt).toLocaleString()}
+              </p>
+            </div>
+            <Button variant="secondary" size="sm" onClick={() => { setSelectedRequest(null); setRejectionReason(''); }}>
+              Back to List
+            </Button>
+          </div>
+
+          {renderSpecsDiff(selectedRequest)}
+
+          <div style={{ 
+            marginTop: 'var(--space-md)', 
+            borderTop: '1px solid var(--border-color)', 
+            paddingTop: 'var(--space-md)',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 'var(--space-sm)'
+          }}>
+            <Input
+              label="Rejection Comments (required only for rejection)"
+              placeholder="e.g. Please clarify calibrating coefficients or re-check the serial number."
+              value={rejectionReason}
+              onChange={(e) => setRejectionReason(e.target.value)}
+            />
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+              <Button variant="danger" onClick={() => handleRejectRequest(selectedRequest.id)}>
+                Reject Proposal
+              </Button>
+              <Button variant="primary" onClick={() => handleApproveRequest(selectedRequest.id)} glow>
+                Approve & Apply
+              </Button>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-md)' }}>
+          <p style={{ color: 'var(--text-secondary)', margin: 0, fontSize: 'var(--font-size-sm)' }}>
+            Review pending specifications changes proposed by mechanics. Compare values and choose to approve or reject them.
+          </p>
+
+          {loadingRequests ? (
+            <div style={{ textAlign: 'center', color: 'var(--text-secondary)', padding: 'var(--space-lg)' }}>
+              Loading change requests...
+            </div>
+          ) : pendingRequests.length === 0 ? (
+            <div style={{ 
+              textAlign: 'center', 
+              color: 'var(--text-muted)', 
+              padding: 'var(--space-xl)', 
+              border: '1px dashed var(--border-color)', 
+              borderRadius: 'var(--radius-md)' 
+            }}>
+              No pending specifications change requests at the moment.
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-xs)', maxHeight: '300px', overflowY: 'auto' }}>
+              {pendingRequests.map(req => (
+                <Card 
+                  key={req.id} 
+                  style={{ 
+                    padding: 'var(--space-sm) var(--space-md)', 
+                    cursor: 'pointer',
+                    transition: 'border-color var(--transition-fast)',
+                  }}
+                  onClick={() => setSelectedRequest(req)}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div>
+                      <h4 style={{ margin: 0 }}>{req.equipment?.name}</h4>
+                      <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--font-size-xs)', margin: '4px 0 0 0' }}>
+                        Proposed by <strong>{req.proposedBy}</strong> &bull; {new Date(req.createdAt).toLocaleDateString()}
+                      </p>
+                    </div>
+                    <Button variant="secondary" size="sm">
+                      Review Diff
+                    </Button>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+
   useEffect(() => {
     fetchCategories();
     fetchStandardTemplate();
@@ -287,8 +561,65 @@ export const Equipment: React.FC = () => {
       if (selectedItem) {
         // Edit existing
         if (user?.role === 'mechanic') {
-          // Mechanics can only patch status
-          await api.put(`/equipment/${selectedItem.id}`, { status: values.status });
+          const keys: Array<keyof EquipmentFormValues> = [
+            'name', 'type', 'location', 'serialNumber', 'manufacturer', 'model', 
+            'manufactureYear', 'inventoryNumber', 'criticality', 'powerKw', 'categoryId'
+          ];
+          
+          let hasSpecsChanges = false;
+          for (const key of keys) {
+            const oldVal = (selectedItem as any)[key];
+            const newVal = values[key];
+            if ((newVal || '') !== (oldVal || '')) {
+              hasSpecsChanges = true;
+              break;
+            }
+          }
+
+          const oldComm = selectedItem.commissioningDate ? new Date(selectedItem.commissioningDate).getTime() : 0;
+          const newComm = values.commissioningDate ? new Date(values.commissioningDate).getTime() : 0;
+          if (oldComm !== newComm) {
+            hasSpecsChanges = true;
+          }
+
+          const oldCustom = selectedItem.customFields || {};
+          const newCustom = values.customFields || {};
+          const customKeys = Array.from(new Set([...Object.keys(oldCustom), ...Object.keys(newCustom)]));
+          for (const key of customKeys) {
+            if ((newCustom[key] || '') !== (oldCustom[key] || '')) {
+              hasSpecsChanges = true;
+              break;
+            }
+          }
+
+          const oldAttrs = selectedItem.attributeValues || [];
+          const newAttrs = values.attributeValues || [];
+          if (oldAttrs.length !== newAttrs.length) {
+            hasSpecsChanges = true;
+          } else {
+            for (const av of newAttrs) {
+              const oldAv = oldAttrs.find(o => o.attributeId === av.attributeId);
+              if (!oldAv || oldAv.value !== av.value) {
+                hasSpecsChanges = true;
+                break;
+              }
+            }
+          }
+
+          // Direct immediate status update if changed
+          if (values.status !== selectedItem.status) {
+            await api.put(`/equipment/${selectedItem.id}`, { status: values.status });
+          }
+
+          // Propose change request if specs changed
+          if (hasSpecsChanges) {
+            await api.post(`/equipment/${selectedItem.id}/change-requests`, {
+              proposedChanges: values
+            });
+            alert('Machinery specifications modification request submitted for approval.');
+          } else if (values.status !== selectedItem.status) {
+            alert('Asset status updated successfully.');
+          }
         } else {
           await api.put(`/equipment/${selectedItem.id}`, values);
         }
@@ -855,7 +1186,7 @@ export const Equipment: React.FC = () => {
                 setIsCategoryModalOpen(true);
               }}>
                 <Settings size={16} style={{ marginRight: '6px' }} />
-                Categories & Templates
+                Categories, Templates & Workflows
               </Button>
               <Button variant="primary" onClick={handleOpenAddModal} glow>
                 <Plus size={16} style={{ marginRight: '6px' }} />
@@ -1113,7 +1444,7 @@ export const Equipment: React.FC = () => {
           setSelectedCatForEdit(null);
           setManagerTab('categories');
         }}
-        title="Category & Template Manager"
+        title="Categories, Templates & Workflows Manager"
         size="lg"
         footer={(
           <Button variant="secondary" onClick={() => {
@@ -1307,6 +1638,11 @@ export const Equipment: React.FC = () => {
                     {uploadSettingsContent}
                   </div>
                 )
+              },
+              {
+                id: 'changeRequests',
+                label: 'Change Requests',
+                content: changeRequestsContent
               }
             ]}
           />
