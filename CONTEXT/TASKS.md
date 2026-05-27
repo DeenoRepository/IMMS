@@ -114,3 +114,61 @@ Build base pages (Login page with role switcher and Main Dashboard with quick li
 
 ### Notes
 None.
+
+---
+
+## Task ID: task-backend-init
+Title: Backend NestJS Initialization
+Status: done
+Priority: high
+Dependencies: [task-frontend-views]
+
+### Description
+Initialize NestJS project in `system/backend` using `@nestjs/cli`, configure TS and workspaces.
+
+### Checklist
+- [x] Run Nest CLI init command inside system/backend
+- [x] Install authentication and database libraries (TypeORM, pg, JWT, Passport, bcryptjs)
+- [x] Create basic .env template file at backend root
+
+### Notes
+None.
+
+---
+
+## Task ID: task-backend-db
+Title: Backend Database & Config Setup
+Status: done
+Priority: medium
+Dependencies: [task-backend-init]
+
+### Description
+Set up TypeORM database connection and config loading.
+
+### Checklist
+- [x] Create ORM options reading from .env
+- [x] Integrate TypeORM Module into main app.module.ts
+
+### Notes
+None.
+
+---
+
+## Task ID: task-backend-auth
+Title: Backend Authentication & RBAC Guards
+Status: done
+Priority: high
+Dependencies: [task-backend-db]
+
+### Description
+Implement JWT authentication, roles decorator, and RolesGuard.
+
+### Checklist
+- [x] Implement JwtStrategy to validate JWT headers
+- [x] Implement Roles decorator and RolesGuard to check user RBAC status
+- [x] Configure AuthModule and AuthController with login and test endpoints
+- [x] Verify build and endpoint behavior
+
+### Notes
+None.
+
