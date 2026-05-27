@@ -1,10 +1,12 @@
 import React from 'react';
 import { useAuthStore } from '../store/authStore';
+import { useThemeStore } from '../store/themeStore';
 import { Button } from '@core/ui';
-import { User as UserIcon, LogOut, Bell } from 'lucide-react';
+import { User as UserIcon, LogOut, Bell, Sun, Moon } from 'lucide-react';
 
 export const Header: React.FC = () => {
   const { user, logout } = useAuthStore();
+  const { theme, toggleTheme } = useThemeStore();
 
   const getRoleColorClass = (role: string) => {
     switch (role) {
@@ -34,6 +36,10 @@ export const Header: React.FC = () => {
 
       {user && (
         <div className="header-actions">
+          <button className="header-icon-btn" onClick={toggleTheme} title={`Switch to ${theme === 'light' ? 'dark' : 'light'} theme`}>
+            {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
+          </button>
+          
           <button className="header-icon-btn" title="Notifications">
             <Bell size={20} />
           </button>

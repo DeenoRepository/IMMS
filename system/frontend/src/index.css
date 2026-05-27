@@ -155,7 +155,7 @@
 
 .sidebar-link.active {
   color: var(--color-primary);
-  background-color: hsl(200, 100%, 8%, 0.4);
+  background-color: var(--bg-tertiary);
   border-left: 3px solid var(--color-primary);
   border-radius: 0 var(--radius-md) var(--radius-md) 0;
   padding-left: calc(var(--space-sm) - 3px);
@@ -199,7 +199,7 @@
   justify-content: center;
   min-height: 100vh;
   background-color: var(--bg-primary);
-  background-image: radial-gradient(circle at 50% 50%, hsl(200, 80%, 15%, 0.15), transparent 70%);
+  background-image: radial-gradient(circle at 50% 50%, var(--bg-secondary), transparent 70%);
 }
 
 .login-card {
@@ -388,7 +388,7 @@
 
 .unauthorized-page {
   border-color: var(--color-danger);
-  background-color: hsl(355, 40%, 6%, 0.4);
+  background-color: var(--bg-secondary);
 }
 
 .unauthorized-page h2 {
