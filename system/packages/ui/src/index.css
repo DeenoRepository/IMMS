@@ -356,6 +356,7 @@ body {
   cursor: pointer;
   border-bottom: 2px solid transparent;
   transition: color var(--transition-fast), border-color var(--transition-fast);
+  outline: none;
 }
 
 .mech-tab-btn:hover {
@@ -365,6 +366,12 @@ body {
 .mech-tab-btn.active {
   color: var(--color-primary);
   border-bottom-color: var(--color-primary);
+}
+
+.mech-tab-btn:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: -2px;
+  border-radius: var(--radius-sm);
 }
 
 .mech-tab-panel {
