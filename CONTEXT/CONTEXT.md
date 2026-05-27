@@ -20,6 +20,7 @@
 - Technical Document Previews (native rendering of PDF, images, plain text, and placeholder displays for unsupported formats) fully implemented inside the technical passport.
 - Document Upload Constraints (dynamic allowed extensions list and maximum file size validation limits, client-side pre-checks, strict server-side Multer security validations, and a dedicated Upload Settings manager tab for admins) fully implemented.
 - High-Fidelity Modal Windows UI/UX Redesign (translucent dark overlays, deep backdrop blurs, organic spring-like scale transitions, perfect circular SVG close buttons, and seamless footers) fully implemented.
+- Alignment and Spacing Polish (perfect 10px/14px padding bounds on forms and controls, consistent margin variables, capsule badges, layout wrapperStyle overrides, and complete design system build consistency) fully implemented.
 
 
 ## Completed Tasks
@@ -51,3 +52,6 @@
 - `task-frontend-dynamic-template-fields`: Implement Dynamic Template Fields Frontend
 - `task-backend-mandatory-docs`: Implement Mandatory Document Templates Backend
 - `task-frontend-mandatory-docs`: Implement Mandatory Document Templates Frontend
+- `task-ui-modal-redesign`: High-Fidelity Modal Windows UI/UX Redesign
+- `task-ui-spacings-polish`: Alignment and Spacing Polish for Blocks and Controls
+

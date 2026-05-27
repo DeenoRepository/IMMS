@@ -3,6 +3,7 @@ import React from 'react';
 export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: string;
   error?: string;
+  wrapperStyle?: React.CSSProperties;
 }
 
 export const Input: React.FC<InputProps> = ({
@@ -10,6 +11,7 @@ export const Input: React.FC<InputProps> = ({
   error,
   className = '',
   id,
+  wrapperStyle,
   ...props
 }) => {
   const inputId = id || (label ? `input-${label.toLowerCase().replace(/\s+/g, '-')}` : undefined);
@@ -22,7 +24,7 @@ export const Input: React.FC<InputProps> = ({
     .join(' ');
 
   return (
-    <div className="mech-input-wrapper">
+    <div className="mech-input-wrapper" style={wrapperStyle}>
       {label && (
         <label htmlFor={inputId} className="mech-input-label">
           {label}
@@ -33,3 +35,4 @@ export const Input: React.FC<InputProps> = ({
     </div>
   );
 };
+

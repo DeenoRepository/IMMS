@@ -278,7 +278,7 @@ export const Maintenance: React.FC = () => {
               placeholder="Search by equipment name or location..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              style={{ marginBottom: 0 }}
+              wrapperStyle={{ marginBottom: 0 }}
             />
           </div>
           <div style={{ flex: 1, minWidth: '150px' }}>
@@ -292,7 +292,7 @@ export const Maintenance: React.FC = () => {
               ]}
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              style={{ marginBottom: 0 }}
+              wrapperStyle={{ marginBottom: 0 }}
             />
           </div>
           <div style={{ flex: 1, minWidth: '150px' }}>
@@ -304,7 +304,7 @@ export const Maintenance: React.FC = () => {
               ]}
               value={typeFilter}
               onChange={(e) => setTypeFilter(e.target.value)}
-              style={{ marginBottom: 0 }}
+              wrapperStyle={{ marginBottom: 0 }}
             />
           </div>
         </div>

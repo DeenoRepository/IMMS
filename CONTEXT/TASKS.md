@@ -556,5 +556,25 @@ Improve UI/UX of modal windows to make them feel highly professional and polishe
 - [x] Add elegant narrow micro-scrollbar styles to modal bodies
 - [x] Verify full project compilation
 
+---
+
+## Task ID: task-ui-spacings-polish
+Title: Alignment and Spacing Polish for Blocks and Controls
+Status: done
+Priority: medium
+Dependencies: [task-ui-modal-redesign]
+
+### Description
+Review and refine all paddings, margins, gaps, and border boundaries inside core visual blocks (widgets, list grids, panels, registry cards) and interactive controls (modals, dropdowns, inputs, buttons, timeline nodes) to establish a highly professional and clean corporate style (Modern Enterprise Style). Ensure robust styling compilation.
+
+### Checklist
+- [x] Inspect and adjust margins/paddings on Dashboard metrics and card actions
+- [x] Standardize Select element inside Login form using UI Select control and align heights
+- [x] Standardize gaps and row margins inside Equipment and Maintenance registry lists
+- [x] Polish inline document upload and checklist badges vertical alignments inside modal windows
+- [x] Rebuild design system `@core/ui` and verify clean compilation and visual updates
+
+
+
 
 

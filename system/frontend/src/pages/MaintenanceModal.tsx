@@ -171,10 +171,10 @@ export const MaintenanceModal: React.FC<MaintenanceModalProps> = ({
           </>
         ) : (
           <div style={{ marginBottom: 'var(--space-md)' }}>
-            <p><strong>Equipment:</strong> {initialValues?.equipment?.name || 'Loading...'}</p>
-            <p><strong>Type:</strong> {initialValues?.type === 'PPR' ? 'Preventive (PPR)' : 'Repair'}</p>
-            <p><strong>Scheduled Date:</strong> {initialValues?.plannedDate ? new Date(initialValues.plannedDate).toLocaleDateString() : ''}</p>
-            <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--font-size-xs)' }}>
+            <p style={{ margin: 'var(--space-xxs) 0' }}><strong>Equipment:</strong> {initialValues?.equipment?.name || 'Loading...'}</p>
+            <p style={{ margin: 'var(--space-xxs) 0' }}><strong>Type:</strong> {initialValues?.type === 'PPR' ? 'Preventive (PPR)' : 'Repair'}</p>
+            <p style={{ margin: 'var(--space-xxs) 0' }}><strong>Scheduled Date:</strong> {initialValues?.plannedDate ? new Date(initialValues.plannedDate).toLocaleDateString() : ''}</p>
+            <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--font-size-xs)', margin: 'var(--space-xs) 0 0 0' }}>
               * Under your role (Mechanic), you are only authorized to change the work order status and completion date.
             </p>
           </div>

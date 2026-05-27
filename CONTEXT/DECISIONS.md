@@ -14,3 +14,8 @@
 - **Decision**: Refine the visual design of modal components using premium SaaS conventions (translucent dark overlays, deep backdrop blurs, organic spring-like scale transitions, perfect circular close buttons, and seamless footers).
 - **Rationale**: Elevating visual presentation, animations, and transitions reinforces application high quality and builds trust in enterprise users. Heavy dark backdrops and sharp entry transitions are replaced with smooth animations (`scale(0.96) translateY(12px) -> scale(1) translateY(0)`) and generous backdrop blurs (`blur(8px)`). Raw text close markers are swapped for beautifully proportioned vector graphics to ensure crisp, scalable displays.
 
+## 4. Input Wrapper Layout Standardisation & wrapperStyle Implementation
+- **Decision**: Introduce a `wrapperStyle` prop to `Input` and `Select` components to enable outer layout override control (specifically bottom margins) on form field elements when aligning them side-by-side or in horizontal layouts.
+- **Rationale**: Passing standard `style` props directly to inputs applies them to the inner `<input>` or `<select>` HTML tag rather than the parent layout `div.mech-input-wrapper`. This caused horizontal inline filter cards to retain the default `margin-bottom: 20px` spacing from the wrapper, causing alignment anomalies. The `wrapperStyle` prop elegantly resolves layout spacing discrepancies while maintaining self-contained, clean design system components.
+
+

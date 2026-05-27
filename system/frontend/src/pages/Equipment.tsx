@@ -439,7 +439,7 @@ export const Equipment: React.FC = () => {
                 value={newFieldCode}
                 onChange={(e) => setNewFieldCode(e.target.value)}
                 placeholder="weight"
-                style={{ marginBottom: 0 }}
+                wrapperStyle={{ marginBottom: 0 }}
               />
             </div>
             <div style={{ flex: 1.5, minWidth: '150px' }}>
@@ -448,7 +448,7 @@ export const Equipment: React.FC = () => {
                 value={newFieldLabel}
                 onChange={(e) => setNewFieldLabel(e.target.value)}
                 placeholder="Weight (kg)"
-                style={{ marginBottom: 0 }}
+                wrapperStyle={{ marginBottom: 0 }}
               />
             </div>
             <div style={{ flex: 1, minWidth: '100px' }}>
@@ -461,7 +461,7 @@ export const Equipment: React.FC = () => {
                 ]}
                 value={newFieldType}
                 onChange={(e) => setNewFieldType(e.target.value)}
-                style={{ marginBottom: 0 }}
+                wrapperStyle={{ marginBottom: 0 }}
               />
             </div>
             <Button variant="primary" onClick={handleAddCustomField} size="sm" style={{ height: '36px' }}>
@@ -573,7 +573,7 @@ export const Equipment: React.FC = () => {
                 value={newReqDocType}
                 onChange={(e) => setNewReqDocType(e.target.value)}
                 placeholder="User Manual"
-                style={{ marginBottom: 0 }}
+                wrapperStyle={{ marginBottom: 0 }}
               />
             </div>
             <div style={{ flex: 1.2, minWidth: '120px' }}>
@@ -585,7 +585,7 @@ export const Equipment: React.FC = () => {
                 ]}
                 value={newReqDocCategoryId}
                 onChange={(e) => setNewReqDocCategoryId(e.target.value)}
-                style={{ marginBottom: 0 }}
+                wrapperStyle={{ marginBottom: 0 }}
               />
             </div>
             <Button variant="primary" onClick={handleAddRequiredDoc} size="sm" style={{ height: '36px' }}>
@@ -854,7 +854,7 @@ export const Equipment: React.FC = () => {
               placeholder="Search by name, type, or location..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              style={{ marginBottom: 0 }}
+              wrapperStyle={{ marginBottom: 0 }}
             />
           </div>
           <div style={{ flex: 1, minWidth: '150px' }}>
@@ -867,7 +867,7 @@ export const Equipment: React.FC = () => {
               ]}
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              style={{ marginBottom: 0 }}
+              wrapperStyle={{ marginBottom: 0 }}
             />
           </div>
           <div style={{ flex: 1, minWidth: '150px' }}>
@@ -878,7 +878,7 @@ export const Equipment: React.FC = () => {
               }))}
               value={typeFilter}
               onChange={(e) => setTypeFilter(e.target.value)}
-              style={{ marginBottom: 0 }}
+              wrapperStyle={{ marginBottom: 0 }}
             />
           </div>
         </div>
@@ -999,7 +999,7 @@ export const Equipment: React.FC = () => {
                       value={newAttrName}
                       onChange={(e) => setNewAttrName(e.target.value)}
                       placeholder="e.g. Max Spindle RPM"
-                      style={{ marginBottom: 0 }}
+                      wrapperStyle={{ marginBottom: 0 }}
                     />
                   </div>
                   <div style={{ flex: 1, minWidth: '100px' }}>
@@ -1011,7 +1011,7 @@ export const Equipment: React.FC = () => {
                       ]}
                       value={newAttrType}
                       onChange={(e) => setNewAttrType(e.target.value)}
-                      style={{ marginBottom: 0 }}
+                      wrapperStyle={{ marginBottom: 0 }}
                     />
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px', height: '36px', paddingBottom: '8px' }}>

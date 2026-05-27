@@ -9,6 +9,7 @@ export interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElemen
   label?: string;
   options: SelectOption[];
   error?: string;
+  wrapperStyle?: React.CSSProperties;
 }
 
 export const Select: React.FC<SelectProps> = ({
@@ -17,6 +18,7 @@ export const Select: React.FC<SelectProps> = ({
   error,
   className = '',
   id,
+  wrapperStyle,
   ...props
 }) => {
   const selectId = id || (label ? `select-${label.toLowerCase().replace(/\s+/g, '-')}` : undefined);
@@ -29,7 +31,7 @@ export const Select: React.FC<SelectProps> = ({
     .join(' ');
 
   return (
-    <div className="mech-input-wrapper">
+    <div className="mech-input-wrapper" style={wrapperStyle}>
       {label && (
         <label htmlFor={selectId} className="mech-input-label">
           {label}
@@ -46,3 +48,4 @@ export const Select: React.FC<SelectProps> = ({
     </div>
   );
 };
+

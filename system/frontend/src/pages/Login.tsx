@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore, type UserRole } from '../store/authStore';
-import { Card, Input, Button } from '@core/ui';
+import { Card, Input, Button, Select } from '@core/ui';
 
 export const Login: React.FC = () => {
   const navigate = useNavigate();
@@ -39,20 +39,17 @@ export const Login: React.FC = () => {
             placeholder="Enter full name"
           />
 
-          <div className="mech-input-wrapper">
-            <label className="mech-input-label">Select System Role</label>
-            <select
-              className="mech-input"
-              value={role}
-              onChange={(e) => setRole(e.target.value as UserRole)}
-              style={{ width: '100%', height: '42px', padding: '0 var(--space-sm)' }}
-            >
-              <option value="mechanic">Mechanic</option>
-              <option value="chief_mechanic">Chief Mechanical Engineer</option>
-              <option value="warehouse_manager">Warehouse Manager</option>
-              <option value="admin">Administrator</option>
-            </select>
-          </div>
+          <Select
+            label="Select System Role"
+            value={role}
+            onChange={(e) => setRole(e.target.value as UserRole)}
+            options={[
+              { value: 'mechanic', label: 'Mechanic' },
+              { value: 'chief_mechanic', label: 'Chief Mechanical Engineer' },
+              { value: 'warehouse_manager', label: 'Warehouse Manager' },
+              { value: 'admin', label: 'Administrator' },
+            ]}
+          />
 
           <Button type="submit" variant="primary" size="lg" glow style={{ width: '100%', marginTop: 'var(--space-md)' }}>
             Sign In to System

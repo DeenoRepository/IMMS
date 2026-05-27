@@ -910,11 +910,11 @@ export const EquipmentModal: React.FC<EquipmentModalProps> = ({
     <div style={{ marginTop: 'var(--space-md)', display: 'flex', flexDirection: 'column', gap: 'var(--space-md)' }}>
       {/* Required Documents Checklist */}
       {requiredDocsList.length > 0 && (
-        <Card style={{ padding: 'var(--space-md)', backgroundColor: 'var(--bg-secondary)', border: '1px solid var(--border-color)' }}>
+        <Card style={{ padding: '16px 20px', backgroundColor: 'var(--bg-secondary)', border: '1px solid var(--border-color)' }}>
           <h4 style={{ margin: '0 0 var(--space-xs) 0', fontSize: 'var(--font-size-sm)', fontWeight: 600 }}>
             Mandatory Documents Checklist
           </h4>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--space-sm)' }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
             {requiredDocsList.map((req) => {
               const isSatisfied = !missingDocs.includes(req.documentType);
               return (
@@ -923,16 +923,16 @@ export const EquipmentModal: React.FC<EquipmentModalProps> = ({
                   style={{ 
                     display: 'flex', 
                     alignItems: 'center', 
-                    gap: '6px', 
+                    gap: '8px', 
                     fontSize: 'var(--font-size-sm)',
-                    padding: '4px 10px',
+                    padding: '6px 12px',
                     borderRadius: 'var(--radius-pill)',
                     backgroundColor: isSatisfied ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)',
                     border: `1px solid ${isSatisfied ? 'var(--color-success)' : 'var(--color-danger)'}`,
                     color: isSatisfied ? 'var(--color-success)' : 'var(--color-danger)',
                   }}
                 >
-                  <span style={{ fontSize: '12px' }}>{isSatisfied ? '✓' : '✗'}</span>
+                  <span style={{ fontSize: '12px', lineHeight: 1 }}>{isSatisfied ? '✓' : '✗'}</span>
                   <span style={{ fontWeight: 500 }}>{req.documentType}</span>
                 </div>
               );
@@ -951,9 +951,9 @@ export const EquipmentModal: React.FC<EquipmentModalProps> = ({
 
       {/* Add Document Form */}
       {isAddingDoc && (
-        <Card style={{ padding: 'var(--space-md)', border: '1px solid var(--border-focus)' }}>
+        <Card style={{ padding: '20px', border: '1px solid var(--border-focus)' }}>
           <h4 style={{ margin: '0 0 var(--space-xs) 0' }}>Upload New Technical Document</h4>
-          <form onSubmit={handleAddDocument} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-sm)' }}>
+          <form onSubmit={handleAddDocument} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             <Input
               label="Document Title"
               value={newDocTitle}
@@ -1018,7 +1018,7 @@ export const EquipmentModal: React.FC<EquipmentModalProps> = ({
           No documents attached to this machinery passport yet.
         </div>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-sm)' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           {documents.map((doc) => {
             // Sort versions by versionNumber DESC
             const sortedVersions = [...doc.versions].sort((a, b) => b.versionNumber - a.versionNumber);
@@ -1026,9 +1026,9 @@ export const EquipmentModal: React.FC<EquipmentModalProps> = ({
             const isExpanded = expandedDocId === doc.id;
 
             return (
-              <Card key={doc.id} style={{ padding: 'var(--space-md)' }}>
+              <Card key={doc.id} style={{ padding: '16px 20px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                  <div style={{ display: 'flex', gap: '10px' }}>
+                  <div style={{ display: 'flex', gap: '16px' }}>
                     <FileText size={28} style={{ color: 'var(--color-primary)', marginTop: '4px' }} />
                     <div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
@@ -1055,7 +1055,7 @@ export const EquipmentModal: React.FC<EquipmentModalProps> = ({
                       </div>
                     </div>
                   </div>
-                  <div style={{ display: 'flex', gap: '6px' }}>
+                  <div style={{ display: 'flex', gap: '8px' }}>
                     {activeVersion && (
                       <>
                         <Button variant="secondary" size="sm" onClick={() => handlePreview(activeVersion.fileUrl, activeVersion.fileName, doc.title)} title="Preview Latest Version">
