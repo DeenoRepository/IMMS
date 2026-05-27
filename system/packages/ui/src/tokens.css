@@ -1,0 +1,61 @@
+:root {
+  /* Color Palette - HSL (Hue, Saturation, Lightness) */
+  /* Base Slate Theme (Dark Mode Primary) */
+  --bg-primary: hsl(220, 20%, 10%);
+  --bg-secondary: hsl(220, 20%, 15%);
+  --bg-tertiary: hsl(220, 20%, 20%);
+  
+  --border-color: hsl(220, 20%, 25%);
+  --border-focus: hsl(200, 100%, 50%);
+
+  --text-primary: hsl(220, 20%, 95%);
+  --text-secondary: hsl(220, 15%, 70%);
+  --text-muted: hsl(220, 10%, 50%);
+
+  /* Status Colors */
+  --color-primary: hsl(200, 100%, 50%);      /* Industrial Blue / Cyber Cyan */
+  --color-primary-hover: hsl(200, 100%, 60%);
+  --color-success: hsl(140, 70%, 45%);       /* Operational Green */
+  --color-success-hover: hsl(140, 70%, 55%);
+  --color-warning: hsl(35, 90%, 50%);        /* Attention Amber / Warning Orange */
+  --color-warning-hover: hsl(35, 90%, 60%);
+  --color-danger: hsl(355, 80%, 50%);        /* Emergency Red / Downtime Red */
+  --color-danger-hover: hsl(355, 80%, 60%);
+
+  /* Gradients */
+  --gradient-cyber: linear-gradient(135deg, hsl(200, 100%, 50%), hsl(260, 80%, 60%));
+  --gradient-glass: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.01));
+
+  /* Shadows */
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.4);
+  --shadow-glow: 0 0 15px rgba(0, 212, 255, 0.2);
+
+  /* Borders & Radius */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-pill: 9999px;
+
+  /* Typography */
+  --font-family: 'Outfit', 'Inter', system-ui, sans-serif;
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-md: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.25rem;
+  --font-size-xxl: 1.5rem;
+
+  /* Spacing */
+  --space-xxs: 0.25rem;
+  --space-xs: 0.5rem;
+  --space-sm: 0.75rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2rem;
+
+  /* Transitions */
+  --transition-fast: 0.15s ease;
+  --transition-normal: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}

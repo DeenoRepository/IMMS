@@ -1,0 +1,178 @@
+@import "./tokens.css";
+
+/* Reset / Base overrides for system */
+body {
+  font-family: var(--font-family);
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Button Component */
+.mech-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-family);
+  font-weight: 500;
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: background-color var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast), transform var(--transition-fast);
+  text-decoration: none;
+  outline: none;
+}
+
+.mech-btn:active {
+  transform: scale(0.98);
+}
+
+.mech-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Variants */
+.mech-btn-primary {
+  background-color: var(--color-primary);
+  color: hsl(220, 20%, 5%);
+}
+.mech-btn-primary:hover:not(:disabled) {
+  background-color: var(--color-primary-hover);
+}
+
+.mech-btn-secondary {
+  background-color: transparent;
+  border-color: var(--border-color);
+  color: var(--text-primary);
+}
+.mech-btn-secondary:hover:not(:disabled) {
+  background-color: var(--bg-tertiary);
+  border-color: var(--text-muted);
+}
+
+.mech-btn-success {
+  background-color: var(--color-success);
+  color: hsl(220, 20%, 5%);
+}
+.mech-btn-success:hover:not(:disabled) {
+  background-color: var(--color-success-hover);
+}
+
+.mech-btn-warning {
+  background-color: var(--color-warning);
+  color: hsl(220, 20%, 5%);
+}
+.mech-btn-warning:hover:not(:disabled) {
+  background-color: var(--color-warning-hover);
+}
+
+.mech-btn-danger {
+  background-color: var(--color-danger);
+  color: var(--text-primary);
+}
+.mech-btn-danger:hover:not(:disabled) {
+  background-color: var(--color-danger-hover);
+}
+
+/* Sizes */
+.mech-btn-sm {
+  padding: var(--space-xxs) var(--space-sm);
+  font-size: var(--font-size-xs);
+  border-radius: var(--radius-sm);
+}
+
+.mech-btn-md {
+  padding: var(--space-xs) var(--space-md);
+  font-size: var(--font-size-sm);
+  border-radius: var(--radius-md);
+}
+
+.mech-btn-lg {
+  padding: var(--space-sm) var(--space-lg);
+  font-size: var(--font-size-md);
+  border-radius: var(--radius-lg);
+}
+
+/* Glow Effect */
+.mech-btn-glow-primary {
+  box-shadow: 0 0 12px rgba(0, 212, 255, 0.3);
+}
+.mech-btn-glow-primary:hover:not(:disabled) {
+  box-shadow: 0 0 18px rgba(0, 212, 255, 0.5);
+}
+
+/* Card Component */
+.mech-card {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--transition-normal), box-shadow var(--transition-normal);
+}
+
+.mech-card-interactive:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--text-muted);
+}
+
+.mech-card-glow {
+  box-shadow: var(--shadow-glow);
+}
+
+/* Input Component */
+.mech-input-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xxs);
+  margin-bottom: var(--space-md);
+}
+
+.mech-input-label {
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.mech-input {
+  font-family: var(--font-family);
+  font-size: var(--font-size-sm);
+  background-color: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-md);
+  outline: none;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.mech-input:focus {
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 2px rgba(0, 212, 255, 0.2);
+}
+
+.mech-input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.mech-input-error {
+  border-color: var(--color-danger);
+}
+.mech-input-error:focus {
+  border-color: var(--color-danger-hover);
+  box-shadow: 0 0 0 2px rgba(255, 60, 60, 0.2);
+}
+
+.mech-input-error-msg {
+  font-size: var(--font-size-xs);
+  color: var(--color-danger);
+  margin-top: 2px;
+}

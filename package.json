@@ -1,0 +1,14 @@
+{
+  "name": "cmms-enterprise",
+  "private": true,
+  "workspaces": [
+    "system/packages/*",
+    "system/frontend",
+    "system/backend",
+    "system/modules/*"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present"
+  }
+}

@@ -1,0 +1,396 @@
+@import "@mech/ui/dist/index.css";
+
+/* Shell Container Layout */
+.shell-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+/* Shell Header Styles */
+.shell-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 64px;
+  background-color: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+  padding: 0 var(--space-lg);
+  flex-shrink: 0;
+  z-index: 10;
+}
+
+.header-brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.brand-logo {
+  font-size: var(--font-size-xl);
+}
+
+.brand-name {
+  font-weight: 700;
+  font-size: var(--font-size-lg);
+  letter-spacing: -0.02em;
+  background: var(--gradient-cyber);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.header-icon-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: var(--space-xxs);
+  border-radius: var(--radius-sm);
+  transition: color var(--transition-fast), background-color var(--transition-fast);
+}
+
+.header-icon-btn:hover {
+  color: var(--text-primary);
+  background-color: var(--bg-tertiary);
+}
+
+.user-profile {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-xxs) var(--space-xs);
+  border-radius: var(--radius-md);
+  background-color: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+}
+
+.user-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-pill);
+  background-color: var(--bg-secondary);
+  color: var(--color-primary);
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.user-name {
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+.user-role {
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Role Badges */
+.role-admin { color: var(--color-danger); }
+.role-chief { color: var(--color-warning); }
+.role-warehouse { color: var(--color-success); }
+.role-mechanic { color: var(--color-primary); }
+
+/* Shell Body Layout */
+.shell-main {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* Sidebar Styles */
+.shell-sidebar {
+  width: 260px;
+  background-color: var(--bg-secondary);
+  border-right: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xxs);
+  padding: var(--space-md);
+  overflow-y: auto;
+}
+
+.sidebar-link {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  transition: color var(--transition-fast), background-color var(--transition-fast), transform var(--transition-fast);
+}
+
+.sidebar-link:hover {
+  color: var(--text-primary);
+  background-color: var(--bg-tertiary);
+  transform: translateX(2px);
+}
+
+.sidebar-link.active {
+  color: var(--color-primary);
+  background-color: hsl(200, 100%, 8%, 0.4);
+  border-left: 3px solid var(--color-primary);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  padding-left: calc(var(--space-sm) - 3px);
+}
+
+.nav-divider {
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  margin-top: var(--space-md);
+  margin-bottom: var(--space-xs);
+  padding-left: var(--space-sm);
+}
+
+.sidebar-footer {
+  padding: var(--space-md);
+  border-top: 1px solid var(--border-color);
+  background-color: var(--bg-primary);
+  text-align: center;
+}
+
+.system-version {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+}
+
+/* Shell Content area */
+.shell-content {
+  flex: 1;
+  padding: var(--space-xl);
+  overflow-y: auto;
+  background-color: var(--bg-primary);
+}
+
+/* Login Page Styles */
+.login-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background-color: var(--bg-primary);
+  background-image: radial-gradient(circle at 50% 50%, hsl(200, 80%, 15%, 0.15), transparent 70%);
+}
+
+.login-card {
+  width: 100%;
+  max-width: 420px;
+}
+
+.login-header {
+  text-align: center;
+  margin-bottom: var(--space-lg);
+}
+
+.login-logo {
+  font-size: 3rem;
+  margin-bottom: var(--space-xs);
+  animation: spin 8s linear infinite;
+  display: inline-block;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.login-header h1 {
+  font-size: var(--font-size-xxl);
+  font-weight: 800;
+  margin: 0;
+  background: var(--gradient-cyber);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.login-header p {
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+  margin: var(--space-xs) 0 0 0;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Dashboard View Styles */
+.dashboard-view {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+.dashboard-welcome h1 {
+  font-size: var(--font-size-xxl);
+  font-weight: 700;
+  margin: 0;
+  color: var(--text-primary);
+}
+
+.dashboard-welcome p {
+  color: var(--text-secondary);
+  margin: var(--space-xxs) 0 0 0;
+}
+
+.dashboard-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--space-md);
+}
+
+.metric-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.metric-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.metric-icon {
+  padding: var(--space-xxs);
+  border-radius: var(--radius-sm);
+  background-color: var(--bg-tertiary);
+}
+
+.metric-icon.success { color: var(--color-success); }
+.metric-icon.warning { color: var(--color-warning); }
+.metric-icon.danger { color: var(--color-danger); }
+.metric-icon.primary { color: var(--color-primary); }
+
+.metric-label {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.metric-value {
+  font-size: var(--font-size-xxl);
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.metric-subtext {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+}
+
+.dashboard-modules-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  margin-top: var(--space-md);
+}
+
+.dashboard-modules-section h2 {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  margin: 0;
+  color: var(--text-primary);
+}
+
+.modules-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--space-md);
+}
+
+.module-access-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.module-access-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.module-access-icon {
+  color: var(--color-primary);
+}
+
+.module-access-header h3 {
+  font-size: var(--font-size-md);
+  font-weight: 600;
+  margin: 0;
+}
+
+.module-access-desc {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  margin: 0;
+  flex-grow: 1;
+}
+
+.module-access-btn {
+  align-self: flex-start;
+  margin-top: var(--space-xs);
+}
+
+/* Module Placeholder / Unauthorized page styles */
+.module-placeholder, .unauthorized-page {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: var(--space-xl);
+  text-align: center;
+  max-width: 600px;
+  margin: 0 auto;
+  box-shadow: var(--shadow-sm);
+}
+
+.module-placeholder h2, .unauthorized-page h2 {
+  color: var(--text-primary);
+  font-weight: 700;
+  margin: 0 0 var(--space-sm) 0;
+}
+
+.module-placeholder p, .unauthorized-page p {
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.unauthorized-page {
+  border-color: var(--color-danger);
+  background-color: hsl(355, 40%, 6%, 0.4);
+}
+
+.unauthorized-page h2 {
+  color: var(--color-danger);
+}
