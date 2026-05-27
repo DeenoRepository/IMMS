@@ -272,3 +272,40 @@ Build the Maintenance list page, metrics headers, scheduling form modal, and rou
 - [x] Register path="maintenance" to use the new Maintenance view in AppRoutes.tsx
 - [x] Verify functionality (CRUD under different roles) and verify full workspace build
 
+---
+
+## Task ID: task-backend-passportization
+Title: Equipment Passportization Backend API
+Status: done
+Priority: high
+Dependencies: [task-frontend-maintenance]
+
+### Description
+Implement database entities, TypeORM registry, upload folders initialization, file-upload service methods, and secured controller upload/download endpoints.
+
+### Checklist
+- [x] Create EquipmentDocument and EquipmentDocumentVersion Entities
+- [x] Register new entities in equipment.module.ts
+- [x] Implement service methods (addDocument, addDocumentVersion, getDocuments, deleteDocument) and upload folder check
+- [x] Implement controller endpoints with JwtAuthGuard, RolesGuard, and Multer FileInterceptor
+- [x] Verify build and endpoint behavior
+
+---
+
+## Task ID: task-frontend-passportization
+Title: Equipment Passportization Frontend UI
+Status: done
+Priority: high
+Dependencies: [task-backend-passportization]
+
+### Description
+Integrate Tabbed UI layout, Document list, expansion version history timeline, download handler, and document upload forms inside EquipmentModal.tsx.
+
+### Checklist
+- [x] Refactor EquipmentModal.tsx with @core/ui Tabs (Specs vs Documents tabs)
+- [x] Implement document rows list with current active version info
+- [x] Implement expandable document version history timeline
+- [x] Implement download button calling the authenticated download endpoint
+- [x] Implement upload forms (Create Document / Upload Version) with role restrictions
+- [x] Verify functionality (uploading, versioning, downloading) and verify clean workspace build
+

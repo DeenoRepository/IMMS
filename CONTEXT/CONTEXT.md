@@ -9,6 +9,7 @@
 - Backend API initialized under `/system/backend` using NestJS, integrated with TypeORM/PostgreSQL connection pooling, and configured with JWT validation and RBAC guards (roles: `mechanic`, `chief_mechanic`, `warehouse_manager`, `admin`).
 - Equipment Management module fully implemented with NestJS CRUD endpoints and React dashboard/CRUD modal views.
 - Maintenance Management (PPR / Repairs) module fully implemented with NestJS CRUD endpoints and React dashboard/CRUD modal views.
+- Equipment Passportization (Attachments & Version Control) fully implemented.
 
 ## Completed Tasks
 - `task-monorepo-init`: Monorepo Workspace Setup
@@ -25,3 +26,5 @@
 - `task-frontend-equipment`: Equipment Frontend Module
 - `task-backend-maintenance`: Maintenance Backend CRUD API
 - `task-frontend-maintenance`: Maintenance Frontend Module
+- `task-backend-passportization`: Equipment Passportization Backend API
+- `task-frontend-passportization`: Equipment Passportization Frontend UI

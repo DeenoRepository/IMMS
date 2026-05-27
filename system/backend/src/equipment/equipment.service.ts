@@ -2,17 +2,32 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Equipment, EquipmentStatus } from './entities/equipment.entity';
+import { EquipmentDocument } from './entities/equipment-document.entity';
+import { EquipmentDocumentVersion } from './entities/equipment-document-version.entity';
 import { CreateEquipmentDto } from './dto/create-equipment.dto';
 import { UpdateEquipmentDto } from './dto/update-equipment.dto';
+import * as fs from 'fs';
 
 @Injectable()
 export class EquipmentService {
   constructor(
     @InjectRepository(Equipment)
     private equipmentRepository: Repository<Equipment>,
+    @InjectRepository(EquipmentDocument)
+    private documentRepository: Repository<EquipmentDocument>,
+    @InjectRepository(EquipmentDocumentVersion)
+    private versionRepository: Repository<EquipmentDocumentVersion>,
   ) {
+    // Ensure uploads directory exists
+    this.ensureUploadsDir();
     // Seed database if empty
     this.seed();
+  }
+
+  private ensureUploadsDir() {
+    if (!fs.existsSync('./uploads/documents')) {
+      fs.mkdirSync('./uploads/documents', { recursive: true });
+    }
   }
 
   async seed() {
@@ -97,5 +112,100 @@ export class EquipmentService {
   async remove(id: string): Promise<void> {
     const equipment = await this.findOne(id);
     await this.equipmentRepository.remove(equipment);
+  }
+
+  async getDocuments(equipmentId: string): Promise<EquipmentDocument[]> {
+    return this.documentRepository.find({
+      where: { equipmentId },
+      relations: ['versions'],
+      order: {
+        createdAt: 'DESC',
+      },
+    });
+  }
+
+  async addDocument(
+    equipmentId: string,
+    title: string,
+    description: string | undefined,
+    file: { filename: string; originalname: string },
+    uploadedBy: string,
+  ): Promise<EquipmentDocument> {
+    const equipment = await this.findOne(equipmentId);
+
+    const doc = this.documentRepository.create({
+      equipmentId: equipment.id,
+      title,
+      description,
+    });
+    const savedDoc = await this.documentRepository.save(doc);
+
+    const version = this.versionRepository.create({
+      documentId: savedDoc.id,
+      versionNumber: 1,
+      fileName: file.originalname,
+      fileUrl: file.filename,
+      uploadedBy,
+      changeSummary: 'Initial document upload',
+    });
+    await this.versionRepository.save(version);
+
+    return this.documentRepository.findOne({
+      where: { id: savedDoc.id },
+      relations: ['versions'],
+    }) as Promise<EquipmentDocument>;
+  }
+
+  async addDocumentVersion(
+    documentId: string,
+    changeSummary: string | undefined,
+    file: { filename: string; originalname: string },
+    uploadedBy: string,
+  ): Promise<EquipmentDocumentVersion> {
+    const doc = await this.documentRepository.findOne({
+      where: { id: documentId },
+      relations: ['versions'],
+    });
+    if (!doc) {
+      throw new NotFoundException(`Document with ID ${documentId} not found`);
+    }
+
+    const latestVersionNum = doc.versions.reduce((max, v) => (v.versionNumber > max ? v.versionNumber : max), 0);
+
+    const newVersion = this.versionRepository.create({
+      documentId: doc.id,
+      versionNumber: latestVersionNum + 1,
+      fileName: file.originalname,
+      fileUrl: file.filename,
+      uploadedBy,
+      changeSummary: changeSummary || `Uploaded version ${latestVersionNum + 1}`,
+    });
+
+    return this.versionRepository.save(newVersion);
+  }
+
+  async deleteDocument(documentId: string): Promise<void> {
+    const doc = await this.documentRepository.findOne({
+      where: { id: documentId },
+      relations: ['versions'],
+    });
+    if (!doc) {
+      throw new NotFoundException(`Document with ID ${documentId} not found`);
+    }
+
+    // Delete files from disk
+    const path = require('path');
+    for (const version of doc.versions) {
+      const filePath = path.join('./uploads/documents', version.fileUrl);
+      if (fs.existsSync(filePath)) {
+        try {
+          fs.unlinkSync(filePath);
+        } catch (e) {
+          console.error(`Failed to delete file ${filePath}:`, e);
+        }
+      }
+    }
+
+    await this.documentRepository.remove(doc);
   }
 }
